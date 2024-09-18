@@ -102,7 +102,7 @@ then entering `4,1` should cause your board to look as it does below:
 
 <img src="img/step5.png" alt="step5grid" width="250"/>
 
-## UML + 1/2pg reflection
+## UML + 1/2-3/4pg reflection
 
 Accompany your submission with a UML class diagram documenting the design of your 
 system. 
