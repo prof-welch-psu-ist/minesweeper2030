@@ -9,9 +9,9 @@ You will be implementing a basic command-line-interface (CLI) minesweeper game. 
 
 The player wins when they have revealed all squares that are **not** mines.
 
-> **Optional CHALLENGE:** Try to do this without LLM assistance 
+> **CHALLENGE:** Do as much of this as you can without LLM assistance (get to the highest step you can)
 > 
-> **OPTIONAL CHALLENGE++:** Try to do this without LLM assistance in 25 mins, stop when you hit the limit 
+> **CHALLENGE++:** Do this without LLM assistance in 25 mins max, stop when you hit the limit 
 > (start a timer) -- which step did you get to?
 
 ## Step 1: object modeling
@@ -102,8 +102,9 @@ system.
 
 The UML can actually be included in your reflection -- which should document your 
 thought process in coming with the data structure for the board, design considerations,
-and generally you feel the code is. If you attempted the challenges listed at the
-top of this readme, say which step you got to within the limit and the biggest bottleneck. 
+and generally on the maintainability and extensibility of the code you ended up with. 
+If you attempted the challenges listed at the top of this readme, say which step you 
+got to within the limit and the biggest bottleneck. 
 
 # Handin
 
