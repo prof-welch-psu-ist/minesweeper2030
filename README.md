@@ -9,6 +9,11 @@ You will be implementing a basic command-line-interface (CLI) minesweeper game. 
 
 The player wins when they have revealed all squares that are **not** mines.
 
+> **Optional CHALLENGE:** Try to do this without LLM assistance 
+> 
+> **OPTIONAL CHALLENGE++:** Try to do this without LLM assistance in 25 mins, stop when you hit the limit 
+> (start a timer) -- which step did you get to?
+
 ## Step 1: object modeling
 
 Come up with a data structure to store the state of the game (the board).
@@ -36,7 +41,9 @@ mines adjacent to it (including diagonally).
 
 Test your function by revealing some number of squares. The picture below has revealed
 the first, third, and fourth squares in the second column (your output should 
-look like the image shown)
+look like the image shown):
+
+<img src="img/step2.png" alt="step2grid" width="250"/>
 
 ## Step 3: user input
 
@@ -58,7 +65,7 @@ Here's a useful test case that makes the following selections:
 Your tests (among other that you think up) should check that 
 your board matches the picture below:
 
-<img src="img/step3.png" alt="step1grid" width="250"/>
+<img src="img/step3.png" alt="step3grid" width="250"/>
 
 ## Step 4: adding a win check
 
@@ -68,9 +75,43 @@ move and do not prompt them for another move.
 
 Write additional tests that cover the board with mines except two 
 squares `(2,3)` and `(1,1)`, then select those two squares by entering
-`2,3` and `1,1`. Your board should match the image.
+`2,3` and `1,1`. Your board should match the image below:
+
+<img src="img/step4.png" alt="step4grid" width="250"/>
 
 ## Step 5: reveal
 
-When a player reveals
+When a player reveals a square with a `0` (that is, with no adjacent mines),
+automatically reveal all squares adjacent to the original square. Repeat this 
+process for any of the adjacent squares that also have no adjacent mines, until
+all `0`s in a contiguous region (and all cells adjacent to one of those `0`s) 
+are revealed.
 
+> note: this can never reveal a mine, so it should never result in a player losing
+
+Write unit tests for this. One potential good one involves returning to the 
+original board (4x4 with mines in the first two squares and third column), 
+then entering `4,1` should cause your board to look as it does below:
+
+<img src="img/step5.png" alt="step5grid" width="250"/>
+
+## UML + 1/2pg reflection
+
+Accompany your submission with a UML class diagram documenting the design of your 
+system. 
+
+The UML can actually be included in your reflection -- which should document your 
+thought process in coming with the data structure for the board, design considerations,
+and generally you feel the code is. If you attempted the challenges listed at the
+top of this readme, say which step you got to within the limit and the biggest bottleneck. 
+
+# Handin
+
+When you are ready to submit (or simply want to 'checkin' your work for the day), open the terminal, 
+cd to the project directory, then make a commit by typing:
+
+> git commit -am "message goes here"
+
+then follow this up with a
+
+> git push origin main
