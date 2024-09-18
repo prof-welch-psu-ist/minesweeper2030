@@ -41,7 +41,7 @@ Now create a function to reveal a square on the board.
 
 This function should take two inputs, a row and a column, and reveal the
 selected square using the rules of Minesweeper:
-- **if the selection is mine**, print the board followed by the text "you lose".
+- **if the selection is a mine**, print the board followed by the text "you lose".
 - **if the selection is not a mine**, change that square to display the number of 
 mines adjacent to it (including diagonally).
 
@@ -53,7 +53,7 @@ look like the image shown):
 
 ## Step 3: user input
 
-Now make it such that your game can take user input (from the `Scanner`).
+Now make it such that your game can take user input (use the good ol' `Scanner` type for this).
 
 Prompt the user to enter a (1-indexed) row and column, separated by a comma
 (e.g., `2,3` for the second row and third column).
