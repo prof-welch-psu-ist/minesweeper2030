@@ -93,7 +93,7 @@ process for any of the adjacent squares that also have no adjacent mines, until
 all `0`s in a contiguous region (and all cells adjacent to one of those `0`s) 
 are revealed.
 
-> note: this can never reveal a mine, so it should never result in a player losing
+> note: this process should never uncover a mine, so it should never result in a player losing
 
 Write unit tests for this. One potential good one involves returning to the 
 original board (4x4 with mines in the first two squares and third column), 
