@@ -86,7 +86,7 @@ squares `(2,3)` and `(1,1)`, then select those two squares by entering
 
 <img src="img/step4.png" alt="step4grid" width="250"/>
 
-## Step 5: reveal
+## Step 5: reveal (optional -- slightly more difficult)
 
 When a player reveals a square with a `0` (that is, with no adjacent mines),
 automatically reveal all squares adjacent to the original square. Repeat this 
@@ -110,7 +110,7 @@ system.
 The UML can actually be included in your reflection -- which should document your 
 thought process in coming with the data structure for the board, design considerations,
 and generally on the maintainability and extensibility of the code you ended up with. 
-If you attempted the challenges listed at the top of this readme, say which step you 
+If you attempted the challenges listed at the top of this readme, include which step you 
 got to within the limit and the biggest bottleneck. 
 
 # Handin
