@@ -107,7 +107,7 @@ public final class MinesweeperGame {
      * encapsulates/"bundles together" the dimension followed by the
      * mine count {@code (dimension, observedMineCt)}
      */
-    private Result<, Integer> sanityCheckStartBoard(ArrayList<ArrayList<String>> board) {
+    private Result<ArrayList<Row>, Integer> sanityCheckStartBoard(ArrayList<ArrayList<String>> board) {
         // first, ensure it's an NxN board (we'll require this)
         int n = board.size();
         int mineCt = 0;
