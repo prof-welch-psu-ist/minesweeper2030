@@ -20,7 +20,7 @@ public final class MinesweeperGame {
      * Note: this is {@code final} to prevent reassignment
      * (outside the class constructors).
      */
-    private final ArrayList<Row> board;
+    private final Board board;
 
     /**
      * The dimension for our square game board.
@@ -33,7 +33,7 @@ public final class MinesweeperGame {
      * @throws IllegalArgumentException if the {@code startingBoard} is
      *                                  malformed.
      */
-    public MinesweeperGame(ArrayList<> startingBoard) {
+    public MinesweeperGame(Board startingBoard) {
         board = startingBoard;
         // returns (N, mine-count)
         var p = sanityCheckStartBoard(board);
@@ -48,10 +48,10 @@ public final class MinesweeperGame {
      */
     public MinesweeperGame() {
         board = new ArrayList<>();
-        board.add(Row.of(0, Safe.SafeInst, Safe.SafeInst, Mine.MineInst, Safe.SafeInst),
+        board.add(Row.of(0, Safe.SafeInst, Safe.SafeInst, Mine.MineInst, Safe.SafeInst));
         board.add(Row.of(1, Safe.SafeInst, Safe.SafeInst, Mine.MineInst, Safe.SafeInst));
-        board.add(asList("_", "_", "_", "_"));
-        board.add(asList("_", "_", "_", "_"));
+        board.add(Row.of(2, Safe.SafeInst, Safe.SafeInst, Safe.SafeInst, Safe.SafeInst));
+        board.add(Row.of(3, Safe.SafeInst, Safe.SafeInst, Safe.SafeInst, Safe.SafeInst));
         this.dimension = 4;
     }
 

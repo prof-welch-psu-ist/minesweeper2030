@@ -13,5 +13,5 @@ public final class BoardLoader {
     // (and we don't need an instance to invoke public static methods).
     private BoardLoader() {}
 
-    public static Result<>
+    //public static Result
 }
