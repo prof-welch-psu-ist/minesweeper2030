@@ -20,7 +20,7 @@ public final class MinesweeperGame {
      * Note: this is {@code final} to prevent reassignment
      * (outside the class constructors).
      */
-    private final Board board;
+    private final SquareBoard board;
 
     /**
      * The dimension for our square game board.
@@ -33,7 +33,7 @@ public final class MinesweeperGame {
      * @throws IllegalArgumentException if the {@code startingBoard} is
      *                                  malformed.
      */
-    public MinesweeperGame(Board startingBoard) {
+    public MinesweeperGame(SquareBoard startingBoard) {
         board = startingBoard;
         // returns (N, mine-count)
         var p = sanityCheckStartBoard(board);

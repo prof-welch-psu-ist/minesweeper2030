@@ -1,14 +1,11 @@
 package edu.psu.ist;
 
+import io.vavr.collection.Vector;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public record Row(int rowNum, ArrayList<TileType> columns) {
-
-    /** Static factory method for constructing a row. */
-    public static Row of(int rowNum, TileType... tiles) {
-        return new Row(rowNum, new ArrayList<>(Arrays.asList(tiles)));
-    }
+public record Row(int rowNum, Vector<TileType> columns) {
 
     /**
      * Returns the column at index {@code col}.
@@ -28,11 +25,7 @@ public record Row(int rowNum, ArrayList<TileType> columns) {
      */
     public Row update(int col, TileType tpe) {
         validateCol(col);
-        // first make a copy of the columns so we don't mutate 'this' instance's
-        // cell type list... here each column in column is an (immutable) TileType obj
-        var updatedColumns = new ArrayList<>(columns);
-        updatedColumns.set(col, tpe);
-        return new Row(this.rowNum, updatedColumns);
+        throw new UnsupportedOperationException("not done");
     }
 
     /** Precondition: 0 <= col <= {@code columns.size()}. */
