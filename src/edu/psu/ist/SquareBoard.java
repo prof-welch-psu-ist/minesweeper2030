@@ -43,12 +43,13 @@ public final class SquareBoard {
         /**
          * I know: a pretty "galaxy-brained" type here... Read as:
          * <pre>
-         * "mutRows is an arraylist that stores an (immutable) vectors
-         * that each contains Result object instances ...
-         * (where each result instance can be either a well-formed {@link TileType} instance or an error msg)."</pre>
+         * "mutRows is an arraylist that stores (immutable) vectors
+         * that each contain Result object instances ...
+         * (where each result instance can be either a well-formed {@link TileType} instance
+         * or an error msg)."</pre>
          */
         private final ArrayList<Vector<Result<TileType, String>>> mutRows = new ArrayList<>();
-        private Vector<String> errors = Vector.empty();
+        private Vector<String> accumulatedErrs = Vector.empty();
 
         public ValidatingBoardBuilder row(TileType... tpes) {
             var converted = Vector.of(tpes) //
@@ -66,7 +67,7 @@ public final class SquareBoard {
                         case Result.Err(var msg) -> msg + "\n";
                         default -> "";
                     });
-            errors = errors.appendAll(errMsgs);
+            accumulatedErrs = accumulatedErrs.appendAll(errMsgs);
             return this;
         }
 
@@ -91,11 +92,11 @@ public final class SquareBoard {
             }
 
             if (mutRows.stream().anyMatch(r -> r.length() != n)) {
-                errors = errors.append("board not square");
+                accumulatedErrs = accumulatedErrs.append("board not square");
             }
 
-            if (!errors.isEmpty()) {
-                return Result.err(errors.mkString("\n"));
+            if (!accumulatedErrs.isEmpty()) {
+                return Result.err(accumulatedErrs.mkString("\n"));
             } else {
                 return Result.ok(new SquareBoard(rows));
             }

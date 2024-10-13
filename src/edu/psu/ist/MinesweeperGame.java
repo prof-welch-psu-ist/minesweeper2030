@@ -114,11 +114,14 @@ public final class MinesweeperGame {
                 .size();
     }
 
-    public Result<SquareBoard, String> updateBoard(int row, int col, TileType updateTpe) {
-        return switch (Pair.of(row, col)) {
-            case Pair(var r, var c) when inBounds(row, col) -> Result.ok(board.withUpdatedTile(r, c, updateTpe));
-            default                                         -> Result.err("row, col out of bounds (must be between 0-3, inclusive)")
-        };
+    /**
+     * <pre><code>
+     * precondition:  0 <= row, col <= dimension()
+     * postcondition: updateBoard = board[row][col]
+     * </code></pre>
+     */
+    public SquareBoard updateBoard(int row, int col, TileType updateTpe) {
+        return board.withUpdatedTile(row, col, updateTpe);
     }
 
     /** Returns true only if {@code 0 <= row, col <= 3}; false otherwise. */
