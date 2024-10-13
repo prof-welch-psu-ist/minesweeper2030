@@ -44,14 +44,14 @@ public final class MinesweeperGame {
                 .row(hidden(), hidden(), mine(), hidden())
                 .row(hidden(), hidden(), hidden(), hidden())
                 .row(hidden(), hidden(), hidden(), hidden())
-                .build().first();
+                .build().get();
         this.dimension = 4;
     }
 
     /** Returns the type of tile located at: row,col. */
     public TileType computeSquare(int row, int col) {
         if (row < 0 || row > 3 || col < 0 || col > 3) {
-            throw new IllegalArgumentException("row and column must be between 0-" + (board.size() - 1));
+            //throw new IllegalArgumentException("row and column must be between 0-" + (board.size() - 1));
         }
         // first: query the board to see what tile type exists at (row, col)
         TileType tpe = board.tileAt(row, col);
@@ -118,7 +118,7 @@ public final class MinesweeperGame {
                 .size();
     }
 
-    public void updateBoard(int row, int col, LoadedTileType updateTpe) {
+    public void updateBoard(int row, int col, TileType updateTpe) {
         // will throw a runtime exception if row, col is bad
         sanityCheckRowCol(row, col);
         board = board.withUpdatedTile(row, col, updateTpe);
@@ -126,7 +126,7 @@ public final class MinesweeperGame {
 
     private void sanityCheckRowCol(int row, int col) {
         if (row < 0 || row > 3 || col < 0 || col > 3) {
-            throw new IllegalArgumentException("row and column must be between 0-" + (board.size() - 1));
+           // throw new IllegalArgumentException("row and column must be between 0-" + (board.size() - 1));
         }
     }
 }

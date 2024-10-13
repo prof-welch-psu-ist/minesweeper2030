@@ -13,7 +13,7 @@ public final class Cli {
         while (true) {
             System.out.println("enter a square board (no spaces) one row at a time");
 
-            builder.row(scanner.nextLine());
+            //builder.row(scanner.nextLine());
 
         }
     }

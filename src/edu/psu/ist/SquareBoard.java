@@ -63,9 +63,12 @@ public final class SquareBoard {
                 var tiles = converted.map(Result::get);
                 row(new Row(rowNum, tiles));
             } else {
-                converted.filter(Result::isError) //
-                        .forEach(err -> errorMsg.append( //
-                                err.get()).append("\n"));
+                converted.filter(Result::isError).forEach(err -> {
+                    switch (err) {
+                        case Result.Err(var msg) -> errorMsg.append(msg).append("\n");
+                        default -> {}
+                    }
+                });
             }
             return this;
         }
