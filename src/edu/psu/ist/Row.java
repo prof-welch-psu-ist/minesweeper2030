@@ -7,12 +7,8 @@ import java.util.Arrays;
 
 public record Row(int rowNum, Vector<TileType> columns) {
 
-    /**
-     * Returns the column at index {@code col}.
-     * @throws IllegalArgumentException if {@code col} is out of bounds.
-     */
+    /** Returns the column at index {@code col}. */
     public TileType get(int col) {
-        validateCol(col);
         return columns.get(col);
     }
 
@@ -24,15 +20,16 @@ public record Row(int rowNum, Vector<TileType> columns) {
      * original row instance is unchanged.
      */
     public Row update(int col, TileType tpe) {
-        validateCol(col);
         throw new UnsupportedOperationException("not done");
     }
 
-    /** Precondition: 0 <= col <= {@code columns.size()}. */
-    private void validateCol(int col) {
-        if (col < 0 || col >= columns.size()) {
-            throw new IndexOutOfBoundsException("col is out of bounds...");
-        }
+    public int length() { return columns.length(); }
+
+    public boolean isMalformed() {
+        return columns.exists(tile -> switch (tile) {
+            case TileType.Error _   -> true;
+            default                 -> false;
+        });
     }
 
     @Override public String toString() {
