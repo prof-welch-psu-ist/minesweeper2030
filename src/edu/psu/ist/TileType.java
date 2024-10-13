@@ -30,7 +30,6 @@ public sealed interface TileType {
         return switch (this) {
             case Mine.MineInst      -> "*";
             case Hidden.HiddenInst  -> "_";
-            case Error.ErrInst      -> "e";
             case Uncovered(var c)   -> c + "";
         };
     }
