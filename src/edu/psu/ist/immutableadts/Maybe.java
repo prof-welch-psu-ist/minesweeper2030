@@ -76,8 +76,8 @@ public sealed interface Maybe<A> {
     }
 
     /**
-     * Returns true if this maybe is nonempty and predicate {@code p} returns
-     * true when applied to this maybe's value.
+     * Returns true only if this maybe is nonempty and predicate {@code p} returns
+     * true when applied to this maybe's value; false otherwise.
      */
     default boolean exists(Predicate<A> p) {
         return !isEmpty() && p.test(this.get());
