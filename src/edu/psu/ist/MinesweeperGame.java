@@ -3,6 +3,7 @@ package edu.psu.ist;
 import edu.psu.ist.TileType.Mine;
 import edu.psu.ist.TileType.Hidden;
 import edu.psu.ist.immutableadts.Pair;
+import edu.psu.ist.immutableadts.Result;
 import io.vavr.collection.Vector;
 
 import static edu.psu.ist.TileType.*;
@@ -113,15 +114,15 @@ public final class MinesweeperGame {
                 .size();
     }
 
-    public void updateBoard(int row, int col, TileType updateTpe) {
-        // will throw a runtime exception if row, col is bad
-        sanityCheckRowCol(row, col);
-        board = board.withUpdatedTile(row, col, updateTpe);
+    public Result<SquareBoard, String> updateBoard(int row, int col, TileType updateTpe) {
+        return switch (Pair.of(row, col)) {
+            case Pair(var r, var c) when inBounds(row, col) -> Result.ok(board.withUpdatedTile(r, c, updateTpe));
+            default                                         -> Result.err("row, col out of bounds (must be between 0-3, inclusive)")
+        };
     }
 
-    private void sanityCheckRowCol(int row, int col) {
-        if (row < 0 || row > 3 || col < 0 || col > 3) {
-           // throw new IllegalArgumentException("row and column must be between 0-" + (board.size() - 1));
-        }
+    /** Returns true only if {@code 0 <= row, col <= 3}; false otherwise. */
+    private boolean inBounds(int row, int col) {
+        return row >= 0 && row <= 3 && col >= 0 && col <= 3;
     }
 }
