@@ -6,9 +6,9 @@ import io.vavr.collection.Vector;
 import java.util.ArrayList;
 
 /**
- * A fully immutable board type for the game. Clients should
- * use an instance of the {@link ValidatingBoardBuilder} class to
- * obtain a validated (immutable) {@link SquareBoard}.
+ * A fully immutable board type for the game. Clients should use an instance
+ * of the {@link ValidatingBoardBuilder} class to obtain a validated
+ * (immutable) {@link SquareBoard}.
  */
 public final class SquareBoard {
 
@@ -40,36 +40,26 @@ public final class SquareBoard {
      */
     public static class ValidatingBoardBuilder {
 
-        private final ArrayList<Row> mutableRows = new ArrayList<>();
-        private int rowNum = 0;
-        private final StringBuilder errorMsg = new StringBuilder();
-
-        public ValidatingBoardBuilder row(Row r) {
-            mutableRows.add(r);
-            rowNum = rowNum + 1;
-            return this;
-        }
+        private final ArrayList<Vector<Result<TileType, String>>> mutableRows2 = new ArrayList<>();
+        private Vector<String> errors = Vector.empty();
 
         public ValidatingBoardBuilder row(TileType... tpes) {
-            return row(new Row(rowNum, Vector.of(tpes)));
+            var converted = Vector.of(tpes) //
+                    .map(Result::<TileType, String>ok);
+            mutableRows2.add(converted);
+            return this;
         }
 
         public ValidatingBoardBuilder row(Character... ts) {
             var converted = Vector.of(ts) //
                     .map(Object::toString) //
                     .map(ValidatingBoardBuilder::tryToConvertCellText);
-
-            if (converted.forAll(Result::isOk)) {
-                var tiles = converted.map(Result::get);
-                row(new Row(rowNum, tiles));
-            } else {
-                converted.filter(Result::isError).forEach(err -> {
-                    switch (err) {
-                        case Result.Err(var msg) -> errorMsg.append(msg).append("\n");
-                        default -> {}
-                    }
-                });
-            }
+            var errMsgs = converted.filter(Result::isError) //
+                    .map(r -> switch (r) {
+                        case Result.Err(var msg) -> msg + "\n";
+                        default -> "";
+                    });
+            errors = errors.appendAll(errMsgs);
             return this;
         }
 
@@ -79,16 +69,28 @@ public final class SquareBoard {
          */
         public Result<SquareBoard, String> build() {
             // does some validation checking on the board
-            var n = mutableRows.size();
+            var n = mutableRows2.size();
 
-            if (mutableRows.stream().anyMatch(r -> r.length() != n)) {
-                errorMsg.append("board not square\n");
+            Vector<Row> rows = Vector.empty();
+            int rowNum = 0;
+
+            // constructing the final Vector<Row> objects from Vector<Result<Tile>..>
+            for (var row : mutableRows2) {
+                if (row.filter(Result::isError).isEmpty()) {
+                    var tiles = row.map(Result::get);
+                    rows = rows.append(new Row(rowNum, tiles));
+                    rowNum++;
+                }
             }
 
-            if (!errorMsg.isEmpty()) {
-                return Result.err(errorMsg.toString());
+            if (mutableRows2.stream().anyMatch(r -> r.length() != n)) {
+                errors = errors.append("board not square");
+            }
+
+            if (!errors.isEmpty()) {
+                return Result.err(errors.mkString("\n"));
             } else {
-                return Result.ok(new SquareBoard(Vector.ofAll(mutableRows)));
+                return Result.ok(new SquareBoard(rows));
             }
         }
 

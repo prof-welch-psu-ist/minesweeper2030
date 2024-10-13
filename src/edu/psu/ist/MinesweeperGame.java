@@ -20,9 +20,6 @@ public final class MinesweeperGame {
      */
     private SquareBoard board;
 
-    /** The dimension for our square game board. */
-    private final int dimension;
-
     /**
      * Initializes the game with a user-specified {@code startingBoard}.
      *
@@ -31,7 +28,6 @@ public final class MinesweeperGame {
      */
     public MinesweeperGame(SquareBoard startingBoard) {
         board = startingBoard;
-        dimension = startingBoard.dimension();
     }
 
     /**
@@ -45,7 +41,6 @@ public final class MinesweeperGame {
                 .row(hidden(), hidden(), hidden(), hidden())
                 .row(hidden(), hidden(), hidden(), hidden())
                 .build().get();
-        this.dimension = 4;
     }
 
     /** Returns the type of tile located at: row,col. */
