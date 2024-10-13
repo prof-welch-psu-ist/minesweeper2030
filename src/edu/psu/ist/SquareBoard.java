@@ -104,10 +104,10 @@ public final class SquareBoard {
 
         private static Result<TileType, String> tryToConvertCellText(String s) {
             return switch (s) {
-                case "_" -> Result.ok(TileType.hidden());
-                case "*" -> Result.ok(TileType.mine());
+                case "_"                        -> Result.ok(TileType.hidden());
+                case "*"                        -> Result.ok(TileType.mine());
                 case String str when isInt(str) -> Result.ok(new TileType.Uncovered(Integer.parseInt(str)));
-                default -> Result.err("Unrecognized cell: " + s);
+                default                         -> Result.err("Unrecognized cell: " + s);
             };
         }
 
