@@ -40,13 +40,20 @@ public final class SquareBoard {
      */
     public static class ValidatingBoardBuilder {
 
-        private final ArrayList<Vector<Result<TileType, String>>> mutableRows2 = new ArrayList<>();
+        /**
+         * I know: a pretty "galaxy-brained" type here... Read as:
+         * <pre>
+         * "mutRows is an arraylist that stores an (immutable) vectors
+         * that each contains Result object instances ...
+         * (where each result instance can be either a well-formed {@link TileType} instance or an error msg)."</pre>
+         */
+        private final ArrayList<Vector<Result<TileType, String>>> mutRows = new ArrayList<>();
         private Vector<String> errors = Vector.empty();
 
         public ValidatingBoardBuilder row(TileType... tpes) {
             var converted = Vector.of(tpes) //
                     .map(Result::<TileType, String>ok);
-            mutableRows2.add(converted);
+            mutRows.add(converted);
             return this;
         }
 
@@ -69,13 +76,13 @@ public final class SquareBoard {
          */
         public Result<SquareBoard, String> build() {
             // does some validation checking on the board
-            var n = mutableRows2.size();
+            var n = mutRows.size();
 
             Vector<Row> rows = Vector.empty();
             int rowNum = 0;
 
             // constructing the final Vector<Row> objects from Vector<Result<Tile>..>
-            for (var row : mutableRows2) {
+            for (var row : mutRows) {
                 if (row.filter(Result::isError).isEmpty()) {
                     var tiles = row.map(Result::get);
                     rows = rows.append(new Row(rowNum, tiles));
@@ -83,7 +90,7 @@ public final class SquareBoard {
                 }
             }
 
-            if (mutableRows2.stream().anyMatch(r -> r.length() != n)) {
+            if (mutRows.stream().anyMatch(r -> r.length() != n)) {
                 errors = errors.append("board not square");
             }
 
