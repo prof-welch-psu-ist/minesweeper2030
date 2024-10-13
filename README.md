@@ -1,6 +1,6 @@
 ## A byzantine minesweeper2030 approach
 
-This branch contains an attempt to utilize some of newer Java language features,
+This branch contains an attempt to utilize some newer Java language features,
 including:
 * record types
 * sealed interfaces as well as design patterns like singletons to represent certain (duplicated)
@@ -13,9 +13,10 @@ functional approach.... in java... which means:
 3. no mutable state in any of the data types (the `Board`, `Row` types, etc.)
 4. capture error states within returned values
 
-In practice, there are exceptions to these rules in this branch. Namely:
+In practice, there are few exceptions to these rules in *this* branch. Namely:
 the `ValidatingBoardBuilder` and the entirety of the `Cli` (command-line-interface)
-class.
+class. I have a byzantine++ solution hidden in another branch that *I think* avoids 
+all mutation (could be wrong).
 
 Most of the data structures are modeled "algebraically" as a sealed interface
 type consisting of some number of implementing types (records/constructors).
@@ -47,7 +48,7 @@ java's first class language mechanism for expressing singleton objects....
 
 [Scala](https://www.scala-lang.org/) is an example of JVM-based language that is functional-first
 (somewhat closely related in lineage to Java) that has "true" first class support for 
-singleton types. Here's how it would look in scala 3:
+singleton types. Here's how the algebraic type for `TileType` would look in scala 3:
 ```scala 3
 sealed trait TileType // traits are like interfaces in Java (applies to: `sealed` too)
 object TileType:
@@ -69,9 +70,10 @@ String renderTileAsString(TileType tile) {
 }
 ```
 The last case is especially interesting as we're "deconstructing" the record type we used
-to model the idea of an uncovered square and matching on the structure -- where `c` is the 
-adjacent mine count for the uncovered square we match... if we didn't use a deconstruction pattern here,
-we'd have to do it like so:
+to model the idea of an uncovered square and matching on the record instance's internal 
+structure -- where `c` is the adjacent mine count for the uncovered square we match... 
+
+If we didn't use a deconstruction pattern here, we'd have to do it like so:
 
 ```java 
 String renderTileAsString2(TileType tile) {
@@ -88,8 +90,11 @@ Can read more about this at the actual JDK proposal docs:
 > https://openjdk.org/jeps/405
 
 Fun fact: the ability to pattern match on arbitrary subtypes (not to mention deconstructing them as shown above)
-renders entire longstanding java design patterns, such as the 
-["visitor pattern"](https://en.wikipedia.org/wiki/Visitor_pattern) nearly obsolete
+has basically rendered the entire (longstanding) gang-of-four ["visitor pattern"](https://en.wikipedia.org/wiki/Visitor_pattern) 
+nearly obsolete. 
+
+So pattern matching is cool example of how OOP design patterns can be rendered obsolete with the addition of new 
+first-class language features. 
 
 ### Handling errors
 
