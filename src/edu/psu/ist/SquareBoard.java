@@ -7,25 +7,16 @@ import java.util.ArrayList;
 
 /**
  * A fully immutable board type for the game. Clients should
- * use the mutable {@link ValidatingBoardBuilder} class to obtain a validated
- * (immutable) instance of an {@link SquareBoard}.
- * <p>
- * <b>Note:</b> this class is fully immutable since {@link Vector} is
- * a fully immutable vector type (don't have to worry about leaking
- * references).
+ * use an instance of the {@link ValidatingBoardBuilder} class to
+ * obtain a validated (immutable) {@link SquareBoard}.
  */
 public final class SquareBoard {
 
     private final Vector<Row> rows;
 
-    private SquareBoard(ValidatingBoardBuilder builder) {
-        rows = Vector.ofAll(builder.mutableRows);
-    }
-
-    // an internal copy constructor (for use on row vectors that have
-    // already gone through the validation process).
+    // private to enforce that only a validated board can exist
     private SquareBoard(Vector<Row> rows) {
-        this(new ValidatingBoardBuilder().rows(rows));
+        this.rows = rows;
     }
 
     public int dimension() {
@@ -38,20 +29,20 @@ public final class SquareBoard {
 
     public SquareBoard withUpdatedTile(int row, int col, TileType tile) {
         var updatedRow = rows.get(row).update(col, tile);
-        var updatedVector = rows.update(row, updatedRow);
-        return new SquareBoard(updatedVector);
+        return new SquareBoard(rows.update(row, updatedRow));
     }
 
     /**
      * A builder class constructing only valid {@link SquareBoard} objects.
-     * i.e.: the {@link #build()} call used to obtain the final SquareBoard object
-     * will either wrap the validated board in a {@link Result#ok} instance or
-     * in a {@link Result#err} instance.
+     * i.e.: use {@link #build()} to obtain a validated SquareBoard
+     * object either wraps the validated board in a {@link Result.Ok} or
+     * in a {@link Result.Err} instance.
      */
     public static class ValidatingBoardBuilder {
 
         private final ArrayList<Row> mutableRows = new ArrayList<>();
         private int rowNum = 0;
+        private final StringBuilder errorMsg = new StringBuilder();
 
         public ValidatingBoardBuilder row(Row r) {
             mutableRows.add(r);
@@ -59,11 +50,11 @@ public final class SquareBoard {
             return this;
         }
 
-        public ValidatingBoardBuilder row(TileType ... tpes) {
+        public ValidatingBoardBuilder row(TileType... tpes) {
             return row(new Row(rowNum, Vector.of(tpes)));
         }
 
-        public ValidatingBoardBuilder row(Character ... ts) {
+        public ValidatingBoardBuilder row(Character... ts) {
             var converted = Vector.of(ts) //
                     .map(Object::toString) //
                     .map(ValidatingBoardBuilder::tryToConvertCellText);
@@ -71,42 +62,30 @@ public final class SquareBoard {
             if (converted.forAll(Result::isOk)) {
                 var tiles = converted.map(Result::get);
                 row(new Row(rowNum, tiles));
-            }
-
-            return this;
-        }
-
-        public ValidatingBoardBuilder rows(Iterable<Row> rows) {
-            for (var r : rows) {
-                row(r);
+            } else {
+                converted.filter(Result::isError) //
+                        .forEach(err -> errorMsg.append( //
+                                err.get()).append("\n"));
             }
             return this;
         }
 
         /**
-         * Returns a Result object that will contain either a successfully
-         * built board or a bunch of loading error messages in a string.
-         * (this type could be made richer -- e.g., return a list of actual
-         * error objects containing line and col info.
+         * Returns an {@link Result} containing either a successfully
+         * validated board or a bunch of loading error messages in a string.
          */
         public Result<SquareBoard, String> build() {
             // does some validation checking on the board
             var n = mutableRows.size();
-            var errorMsg = "";
-            var badCells = mutableRows.stream()
-                    .anyMatch(Row::isMalformed);
-            if (badCells) {
-                errorMsg = errorMsg + "board contains unrecognized cell types\n";
+
+            if (mutableRows.stream().anyMatch(r -> r.length() != n)) {
+                errorMsg.append("board not square\n");
             }
-            var notSquare = mutableRows.stream()
-                    .anyMatch(r -> r.length() == n);
-            if (notSquare) {
-                errorMsg = errorMsg + "board not square.";
-            }
-            if (badCells || notSquare) {
-                return Result.err(errorMsg);
+
+            if (!errorMsg.isEmpty()) {
+                return Result.err(errorMsg.toString());
             } else {
-                return Result.ok(new SquareBoard(this));
+                return Result.ok(new SquareBoard(Vector.ofAll(mutableRows)));
             }
         }
 
@@ -114,10 +93,22 @@ public final class SquareBoard {
             return switch (s) {
                 case "_" -> Result.ok(TileType.hidden());
                 case "*" -> Result.ok(TileType.mine());
-                case String str when Utils.isInt(str) ->
-                    Result.ok(new TileType.Uncovered(Integer.parseInt(str)));
+                case String str when isInt(str) -> Result.ok(new TileType.Uncovered(Integer.parseInt(str)));
                 default -> Result.err("Unrecognized cell: " + s);
             };
+        }
+
+        /**
+         * Returns true only if text {@code s} contains a valid number
+         * (positive or negative).
+         */
+        public static boolean isInt(String s) {
+            try {
+                Integer.parseInt(s);
+                return true;
+            } catch (NumberFormatException _) {
+                return false;
+            }
         }
     }
 }

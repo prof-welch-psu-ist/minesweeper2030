@@ -49,7 +49,7 @@ public final class MinesweeperGame {
     }
 
     /** Returns the type of tile located at: row,col. */
-    public LoadedTileType computeSquare(int row, int col) {
+    public TileType computeSquare(int row, int col) {
         if (row < 0 || row > 3 || col < 0 || col > 3) {
             throw new IllegalArgumentException("row and column must be between 0-" + (board.size() - 1));
         }
@@ -60,7 +60,6 @@ public final class MinesweeperGame {
         return switch (tpe) {
             case Mine.MineInst          -> mine();
             case TileType.Uncovered t   -> t;
-            case TileType.Error t       -> t;
             case Hidden.HiddenInst      -> {
                 int adjacentMines = adjacentMineCount(row, col);
                 yield new Uncovered(adjacentMines);

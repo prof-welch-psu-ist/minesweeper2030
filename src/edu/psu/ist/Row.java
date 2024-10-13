@@ -20,20 +20,17 @@ public record Row(int rowNum, Vector<TileType> columns) {
      * original row instance is unchanged.
      */
     public Row update(int col, TileType tpe) {
-        throw new UnsupportedOperationException("not done");
+        return new Row(rowNum, columns.update(col, tpe));
     }
 
     public int length() { return columns.length(); }
 
-    public boolean isMalformed() {
-        return columns.exists(tile -> switch (tile) {
-            case TileType.Error _   -> true;
-            default                 -> false;
-        });
-    }
-
     @Override public String toString() {
-        var first = true;
+        // can also do (since vavr collections offer a nice string delimiter method)
+        return columns.map(TileType::cellAsString)
+                      .mkString(" ");
+        // more traditional way:
+        /*var first = true;
         var sb = new StringBuilder();
         for (var tile : columns) {
             if (first) {
@@ -43,6 +40,6 @@ public record Row(int rowNum, Vector<TileType> columns) {
                 sb.append(" ").append(tile.cellAsString());
             }
         }
-        return sb.toString();
+        return sb.toString();*/
     }
 }

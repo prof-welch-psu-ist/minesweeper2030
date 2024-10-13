@@ -1,7 +1,5 @@
 package edu.psu.ist;
 
-// singletons to represent the mined and covered square types
-
 /**
  * Represents the tile type with three possibilities:
  * <ul>
