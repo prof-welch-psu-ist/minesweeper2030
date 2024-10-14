@@ -121,7 +121,9 @@ public final class MinesweeperGame {
      * </code></pre>
      */
     public SquareBoard updateBoard(int row, int col, TileType updateTpe) {
-        if (row < 0 || row > board.dimension())
+        if (row < 0 || row > board.dimension()) {
+            throw new IllegalArgumentException("not right");
+        }
         return board.withUpdatedTile(row, col, updateTpe);
     }
 
