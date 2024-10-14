@@ -51,6 +51,7 @@ public final class SquareBoard {
         private final ArrayList<Vector<Result<TileType, String>>> mutRows = new ArrayList<>();
         private Vector<String> accumulatedErrs = Vector.empty();
 
+        public 
         public ValidatingBoardBuilder row(TileType... tpes) {
             var converted = Vector.of(tpes) //
                     .map(Result::<TileType, String>ok);
