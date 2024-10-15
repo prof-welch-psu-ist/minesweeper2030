@@ -36,12 +36,12 @@ public final class SquareBoard {
      * A builder class constructing only valid {@link SquareBoard} objects.
      * i.e.: use {@link #build()} to obtain a validated SquareBoard
      * object either wraps the validated board in a {@link Result.Ok} or
-     * in a {@link Result.Err} instance.
+     * an error msg in a {@link Result.Err} instance.
      */
     public static class ValidatingBoardBuilder {
 
         /**
-         * I know: a pretty "galaxy-brained" type here... Read as:
+         * I know, I know: a pretty ugly type here... Read as:
          * <pre>
          * "mutRows is an arraylist that stores (immutable) vectors
          * that each contain Result object instances ...
@@ -51,7 +51,6 @@ public final class SquareBoard {
         private final ArrayList<Vector<Result<TileType, String>>> mutRows = new ArrayList<>();
         private Vector<String> accumulatedErrs = Vector.empty();
 
-        public 
         public ValidatingBoardBuilder row(TileType... tpes) {
             var converted = Vector.of(tpes) //
                     .map(Result::<TileType, String>ok);
@@ -65,23 +64,31 @@ public final class SquareBoard {
                     .map(ValidatingBoardBuilder::tryToConvertCellText);
             var errMsgs = converted.filter(Result::isError) //
                     .map(r -> switch (r) {
-                        case Result.Err(var msg) -> msg + "\n";
-                        default -> "";
+                        case Result.Err(var msg) -> msg;
+                        default                  -> "";
                     });
             accumulatedErrs = accumulatedErrs.appendAll(errMsgs);
+            mutRows.add(converted);
             return this;
         }
 
         /**
-         * Returns an {@link Result} containing either a successfully
-         * validated board or a bunch of loading error messages in a string.
+         * Builds a validated {@link SquareBoard}, ensuring structural validity
+         * (e.g., rows are the same length, tiles are valid, and the board is square).
+         * <p>
+         * Game-specific checks (e.g., uncovered square logic) are handled in
+         * {@link MinesweeperGame}. This method focuses only on board structure
+         * for flexibility and maintainability.
+         *
+         * @return a {@link Result} with a valid {@link SquareBoard} or error
+         * message.
          */
         public Result<SquareBoard, String> build() {
             // does some validation checking on the board
             var n = mutRows.size();
 
-            Vector<Row> rows = Vector.empty();
-            int rowNum = 0;
+            var rows = Vector.<Row>empty();
+            var rowNum = 0;
 
             // constructing the final Vector<Row> objects from Vector<Result<Tile>..>
             for (var row : mutRows) {
@@ -108,7 +115,7 @@ public final class SquareBoard {
                 case "_"                        -> Result.ok(TileType.hidden());
                 case "*"                        -> Result.ok(TileType.mine());
                 case String str when isInt(str) -> Result.ok(new TileType.Uncovered(Integer.parseInt(str)));
-                default                         -> Result.err("Unrecognized cell: " + s);
+                default                         -> Result.err("unrecognized cell: " + s);
             };
         }
 

@@ -47,7 +47,7 @@ public final class MinesweeperGame {
     /** Returns the type of tile located at: row,col. */
     public TileType computeSquare(int row, int col) {
         if (row < 0 || row > 3 || col < 0 || col > 3) {
-            //throw new IllegalArgumentException("row and column must be between 0-" + (board.size() - 1));
+            throw new IllegalArgumentException("row and column must be between 0-" + (board.dimension() - 1));
         }
         // first: query the board to see what tile type exists at (row, col)
         TileType tpe = board.tileAt(row, col);
@@ -70,7 +70,7 @@ public final class MinesweeperGame {
     public void advanceGame(int row, int col) {
         // compute the tile selected by row,col
         var tpe = computeSquare(row, col);
-        updateBoard(row, col, tpe);
+        board = updateBoard(row, col, tpe);
     }
 
     public boolean shouldAdvanceGame(int row, int col) {

@@ -15,7 +15,7 @@ public final class Cli {
         while (true) {
             System.out.println("enter a square board (no spaces) one row at a time");
             var line = scanner.nextLine();
-            builder.row(line.chars().mapToObj(c -> (char) c).toList());
+            //builder.row(line.chars().mapToObj(c -> (char) c).toList());
             //builder.row(scanner.nextLine());
             break;
         }
