@@ -49,11 +49,12 @@ public final class SquareBoard {
          * or an error msg)."</pre>
          */
         private final ArrayList<Vector<Result<TileType, String>>> mutRows = new ArrayList<>();
-        private Vector<String> accumulatedErrs = Vector.empty();
 
         public ValidatingBoardBuilder row(TileType... tpes) {
+
             var converted = Vector.of(tpes) //
-                    .map(Result::<TileType, String>ok);
+                    .map(ValidatingBoardBuilder::validateTile);
+
             mutRows.add(converted);
             return this;
         }
@@ -62,26 +63,17 @@ public final class SquareBoard {
             var converted = Vector.of(ts) //
                     .map(Object::toString) //
                     .map(ValidatingBoardBuilder::tryToConvertCellText);
-            var errMsgs = converted.filter(Result::isError) //
-                    .map(r -> switch (r) {
-                        case Result.Err(var msg) -> msg;
-                        default                  -> "";
-                    });
-            accumulatedErrs = accumulatedErrs.appendAll(errMsgs);
             mutRows.add(converted);
             return this;
         }
 
         /**
-         * Builds a validated {@link SquareBoard}, ensuring structural validity
+         * Builds a validated {@link SquareBoard} focusing strictly on well-formedness
          * (e.g., rows are the same length, tiles are valid, and the board is square).
          * <p>
          * Game-specific checks (e.g., uncovered square logic) are handled in
-         * {@link MinesweeperGame}. This method focuses only on board structure
-         * for flexibility and maintainability.
-         *
-         * @return a {@link Result} with a valid {@link SquareBoard} or error
-         * message.
+         * {@link MinesweeperGame}. This method is narrowly focused on structural
+         * checks mentioned.
          */
         public Result<SquareBoard, String> build() {
             // does some validation checking on the board
@@ -99,6 +91,15 @@ public final class SquareBoard {
                 }
             }
 
+            var accumulatedErrs = Vector.empty();
+            for (var rawRow : mutRows) {
+                var converted = rawRow.filter(Result::isError).map(r -> switch (r) {
+                    case Result.Err(var msg) -> msg;
+                    default -> "";
+                });
+                accumulatedErrs = accumulatedErrs.appendAll(converted);
+            }
+
             if (mutRows.stream().anyMatch(r -> r.length() != n)) {
                 accumulatedErrs = accumulatedErrs.append("board not square");
             }
@@ -110,12 +111,19 @@ public final class SquareBoard {
             }
         }
 
+        private static Result<TileType, String> validateTile(TileType tpe) {
+            return switch (tpe) {
+                case TileType.Uncovered(var ct) when ct < 0 -> Result.err("negative tile: " + ct);
+                default -> Result.ok(tpe);
+            };
+        }
+
         private static Result<TileType, String> tryToConvertCellText(String s) {
             return switch (s) {
-                case "_"                        -> Result.ok(TileType.hidden());
-                case "*"                        -> Result.ok(TileType.mine());
+                case "_" -> Result.ok(TileType.hidden());
+                case "*" -> Result.ok(TileType.mine());
                 case String str when isInt(str) -> Result.ok(new TileType.Uncovered(Integer.parseInt(str)));
-                default                         -> Result.err("unrecognized cell: " + s);
+                default -> Result.err("unrecognized cell: " + s);
             };
         }
 

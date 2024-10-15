@@ -42,8 +42,7 @@ public final class SquareBoardTests {
                 .row('_') //
                 .row('&', '_').build();
         Assertions.assertTrue(board.isError());
-        Assertions.assertEquals(
-                """
+        Assertions.assertEquals("""
                 unrecognized cell: $
                 unrecognized cell: +
                 unrecognized cell: &
@@ -51,7 +50,7 @@ public final class SquareBoardTests {
                 """.trim(), board.getError());
     }
 
-    @Test public void testValidBoard01() {
+    @Test public void testValidBoards01() {
         // test some valid boards ... note when we say valid
         // we do not mean: in a valid minesweeper *game* state
         var b1 = new SquareBoard.ValidatingBoardBuilder() //
@@ -65,7 +64,7 @@ public final class SquareBoardTests {
         Assertions.assertTrue(b2.isOk());
     }
 
-    @Test public void testAltTileRow() {
+    @Test public void testValidBoards02() {
         // test some valid boards ... note when we say valid
         // we do not mean: in a valid minesweeper *game* state
         var b1 = new SquareBoard.ValidatingBoardBuilder() //
@@ -75,7 +74,7 @@ public final class SquareBoardTests {
 
         var b2 = new SquareBoard.ValidatingBoardBuilder() //
                 .row('*', '*') //
-                .row('0', '0').build();
+                .row('8', '0').build();
         Assertions.assertTrue(b2.isOk());
 
         var b3 = new SquareBoard.ValidatingBoardBuilder() //
@@ -85,5 +84,44 @@ public final class SquareBoardTests {
         var b4 = new SquareBoard.ValidatingBoardBuilder() //
                 .row('4').build();
         Assertions.assertTrue(b4.isOk());
+    }
+
+    @Test public void testValidBoards03() {
+
+        var b1 = new SquareBoard.ValidatingBoardBuilder() //
+                .row(un(2)).build();
+        Assertions.assertTrue(b1.isOk());
+    }
+
+    @Test public void testCantInitBadBoard05() {
+
+        // using alternate row(..) method that accepts TileTypes,
+        // not chars -- allows for more interesting failure tests
+        var b1 = new SquareBoard.ValidatingBoardBuilder() //
+                .row(un(2), un(2)).build();
+        Assertions.assertTrue(b1.isError());
+        Assertions.assertEquals("board not square", b1.getError());
+
+        var b2 = new SquareBoard.ValidatingBoardBuilder() //
+                .row(TileType.mine(), un(2)) //
+                .row(un(-3)).build();
+        Assertions.assertTrue(b2.isError());
+        Assertions.assertEquals("""
+                negative tile: -3
+                board not square
+                """.trim(), b2.getError());
+
+        var b3 = new SquareBoard.ValidatingBoardBuilder() //
+                .row(TileType.mine(), un(-12)) //
+                .row(TileType.hidden(), un(-3)).build();
+        Assertions.assertTrue(b3.isError());
+        Assertions.assertEquals("""
+                negative tile: -12
+                negative tile: -3
+                """.trim(), b3.getError());
+    }
+
+    private static TileType un(int count) {
+        return new TileType.Uncovered(count);
     }
 }
