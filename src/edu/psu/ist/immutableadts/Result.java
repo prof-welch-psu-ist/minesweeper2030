@@ -68,13 +68,6 @@ public sealed interface Result<T, E> {
         };
     }
 
-    default Maybe<T> toMaybe() {
-        return switch (this) {
-            case Ok(var t) -> Maybe.of(t);
-            case Err(_) -> Maybe.none();
-        };
-    }
-
     // static/'companion' methods
 
     /**

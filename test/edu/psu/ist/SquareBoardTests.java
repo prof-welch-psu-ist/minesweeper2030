@@ -3,125 +3,78 @@ package edu.psu.ist;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.BiFunction;
+
+import static edu.psu.ist.TileType.*;
+
 public final class SquareBoardTests {
 
-    @Test public void testCantInitBadBoard01() {
-        // tests to see that the build() method returns failure
-        // when given bad cells
-        var board = new SquareBoard.ValidatingBoardBuilder() //
-                .row('_', 'a') //
-                .row('_', '_').build();
-        Assertions.assertTrue(board.isError());
-        Assertions.assertEquals("unrecognized cell: a", board.getError());
+    @Test public void testFold01() {
+
+        var boardRes = new SquareBoard.ValidatingBoardBuilder()
+                .row(mine(), un(2)) //
+                .row(un(3), un(0)) //
+                .build();
+        Assertions.assertTrue(boardRes.isOk());
+        var board = boardRes.get();
+        // assert above means its safe here to unwrap the board
+
+        // define a small function to count the number of uncovered tiles
+        // note: local variable type inference ('var') doesn't
+        // work here if initializing said variable to a lambda expression
+        BiFunction<TileType, Integer, Integer> f = (tile, x) -> switch (tile) {
+            case Uncovered _ -> x + 1;
+            default         -> x;
+        };
+        var uncoveredCt = board.compute(0, f);
+        Assertions.assertEquals(3, uncoveredCt);
+
+        // now count the uncovered tiles containing mine counts == 3
+        f = (tile, x) -> switch (tile) {
+            case Uncovered(var ct) when ct == 3 -> x + 1;
+            default -> x;
+        };
+        var uncoveredCt2 = board.compute(0, f);
+        Assertions.assertEquals(1, uncoveredCt2);
     }
 
-    @Test public void testCantInitBadBoard02() {
-        // board is not square due to row count (all tiles are valid)
-        var board = new SquareBoard.ValidatingBoardBuilder() //
-                .row('_', '*') //
-                .row('_', '_') //
-                .row('_', '_').build();
-        Assertions.assertTrue(board.isError());
-        Assertions.assertEquals("board not square", board.getError());
+    @Test public void testFold02() {
+        var boardRes = new SquareBoard.ValidatingBoardBuilder() //
+                .row(mine(), un(2), hidden()) //
+                .row(un(3), un(0), mine()) //
+                .row(un(3), mine(), un(0)) //
+                .build();
+        Assertions.assertTrue(boardRes.isOk());
+        var board = boardRes.get(); // assert above means its safe here to unwrap the board
+
+        // how many mines?
+        BiFunction<TileType, Integer, Integer> f = (tile, x) -> switch (tile) {
+            case TileType.Mine _ -> x + 1;
+            default -> x;
+        };
+        var uncoveredCt = board.compute(0, f);
+        Assertions.assertEquals(3, uncoveredCt);
+        // --
+
+        // how many hidden tiles?
+        f = (tile, x) -> switch (tile) {
+            case Hidden _ -> x + 1;
+            default -> x;
+        };
+        var uncoveredCt2 = board.compute(0, f);
+        Assertions.assertEquals(1, uncoveredCt2);
+        // --
     }
 
-    @Test public void testCantInitBadBoard03() {
-        // board is not square due to bad col counts
-        var board = new SquareBoard.ValidatingBoardBuilder() //
-                .row('_', '*', '_') //
-                .row('_') //
-                .row('_', '_').build();
-        Assertions.assertTrue(board.isError());
-        Assertions.assertEquals("board not square", board.getError());
+    @Test public void testFold03() {
+
+        // sum of all uncovered tiles?
+        BiFunction<TileType, Integer, Integer> f = (tile, x) -> switch (tile) {
+            case Uncovered(var ct) -> ct + x;
+            default -> x;
+        };
+        var uncoveredCt3 = boardRes.get().compute(0, f);
+        boardRes = boardRes.get().withUpdatedTile() Assertions.assertEquals(8, uncoveredCt3);
     }
 
-    @Test public void testCantInitBadBoard04() {
-        // board is not square and has invalid cell types
-        var board = new SquareBoard.ValidatingBoardBuilder() //
-                .row('$', '*', '+') //
-                .row('_') //
-                .row('&', '_').build();
-        Assertions.assertTrue(board.isError());
-        Assertions.assertEquals("""
-                unrecognized cell: $
-                unrecognized cell: +
-                unrecognized cell: &
-                board not square
-                """.trim(), board.getError());
-    }
-
-    @Test public void testValidBoards01() {
-        // test some valid boards ... note when we say valid
-        // we do not mean: in a valid minesweeper *game* state
-        var b1 = new SquareBoard.ValidatingBoardBuilder() //
-                .row('_', '*') //
-                .row('_', '_').build();
-        Assertions.assertTrue(b1.isOk());
-
-        var b2 = new SquareBoard.ValidatingBoardBuilder() //
-                .row('*', '*') //
-                .row('0', '0').build();
-        Assertions.assertTrue(b2.isOk());
-    }
-
-    @Test public void testValidBoards02() {
-        // test some valid boards ... note when we say valid
-        // we do not mean: in a valid minesweeper *game* state
-        var b1 = new SquareBoard.ValidatingBoardBuilder() //
-                .row('_', '*') //
-                .row('_', '_').build();
-        Assertions.assertTrue(b1.isOk());
-
-        var b2 = new SquareBoard.ValidatingBoardBuilder() //
-                .row('*', '*') //
-                .row('8', '0').build();
-        Assertions.assertTrue(b2.isOk());
-
-        var b3 = new SquareBoard.ValidatingBoardBuilder() //
-                .row('*').build();
-        Assertions.assertTrue(b3.isOk());
-
-        var b4 = new SquareBoard.ValidatingBoardBuilder() //
-                .row('4').build();
-        Assertions.assertTrue(b4.isOk());
-    }
-
-    @Test public void testValidBoards03() {
-
-        var b1 = new SquareBoard.ValidatingBoardBuilder() //
-                .row(un(2)).build();
-        Assertions.assertTrue(b1.isOk());
-    }
-
-    @Test public void testCantInitBadBoard05() {
-
-        // using alternate row(..) method that accepts TileTypes,
-        // not chars -- allows for more interesting failure tests
-        var b1 = new SquareBoard.ValidatingBoardBuilder() //
-                .row(un(2), un(2)).build();
-        Assertions.assertTrue(b1.isError());
-        Assertions.assertEquals("board not square", b1.getError());
-
-        var b2 = new SquareBoard.ValidatingBoardBuilder() //
-                .row(TileType.mine(), un(2)) //
-                .row(un(-3)).build();
-        Assertions.assertTrue(b2.isError());
-        Assertions.assertEquals("""
-                negative tile: -3
-                board not square
-                """.trim(), b2.getError());
-
-        var b3 = new SquareBoard.ValidatingBoardBuilder() //
-                .row(TileType.mine(), un(-12)) //
-                .row(TileType.hidden(), un(-3)).build();
-        Assertions.assertTrue(b3.isError());
-        Assertions.assertEquals("""
-                negative tile: -12
-                negative tile: -3
-                """.trim(), b3.getError());
-    }
-
-    private static TileType un(int count) {
-        return new TileType.Uncovered(count);
-    }
 }

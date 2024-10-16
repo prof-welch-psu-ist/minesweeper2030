@@ -10,12 +10,14 @@ package edu.psu.ist;
  * </ul>
  */
 public sealed interface TileType {
+
     enum Mine                   implements TileType {MineInst}
     enum Hidden                 implements TileType {HiddenInst}
     record Uncovered(int count) implements TileType {}
 
     static Mine mine() { return Mine.MineInst; }
     static Hidden hidden() { return Hidden.HiddenInst; }
+    static TileType un(int count) { return new Uncovered(count); }
 
     default boolean isMine() {
         return switch (this) {

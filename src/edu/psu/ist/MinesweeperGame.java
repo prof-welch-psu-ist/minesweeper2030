@@ -114,6 +114,10 @@ public final class MinesweeperGame {
                 .size();
     }
 
+    public String renderGameState() {
+        return board.toString();
+    }
+
     /**
      * <pre><code>
      * precondition:  0 <= row, col <= dimension()

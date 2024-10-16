@@ -4,6 +4,7 @@ import edu.psu.ist.immutableadts.Result;
 import io.vavr.collection.Vector;
 
 import java.util.ArrayList;
+import java.util.function.BiFunction;
 
 /**
  * A fully immutable board type for the game. Clients should use an instance
@@ -32,11 +33,28 @@ public final class SquareBoard {
         return new SquareBoard(rows.update(row, updatedRow));
     }
 
+    // this method allows you to fold each row of this board into a single
+    // value of type A
+
+    /**
+     * Left-folds the rows of this board into a single value {@code A} using
+     * the provided binary function {@code f}.
+     */
+    public <A> A compute(A start, BiFunction<TileType, A, A> f) {
+        return rows.foldLeft(start, (a, row) ->
+                        row.columns().foldLeft(a,
+                                (a1, tile) -> f.apply(tile, a1)));
+    }
+
+    @Override public String toString() {
+        return rows.mkString("\n");
+    }
+
     /**
      * A builder class constructing only valid {@link SquareBoard} objects.
      * i.e.: use {@link #build()} to obtain a validated SquareBoard
-     * object either wraps the validated board in a {@link Result.Ok} or
-     * an error msg in a {@link Result.Err} instance.
+     * object that either wraps the validated board in a {@link Result.Ok} or
+     * an error msg in a {@link Result.Err}.
      */
     public static class ValidatingBoardBuilder {
 
