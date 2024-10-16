@@ -1,22 +1,18 @@
 ## A byzantine minesweeper2030 approach
 
-This branch contains an attempt to utilize some newer Java language features,
-including:
+This is by no means high quality code -- mostly an attempt to utilize some 
+newer Java language features, including:
 * record types
-* sealed interfaces as well as design patterns like singletons to represent certain (duplicated)
-  square types that make up the board.
+* sealed interfaces and records as well as design patterns like singletons 
+to represent certain (duplicated) square types that make up the board.
+  * [here is an excellent article summarizing sealed interfaces and records](https://blog.jetbrains.com/idea/2020/09/java-15-and-intellij-idea/)
+* pattern matching via [switch expressions](https://docs.oracle.com/en/java/javase/17/language/switch-expressions-and-statements.html)
 
-The repo attempts to do the minesweeper pa using a (somewhat, very(?!)) strictly
-functional approach.... in java... which means:
-1. no updating state via assignment statements
-2. no iteration (`while` or `for`) -- only recursion
-3. no mutable state in any of the data types (the `Board`, `Row` types, etc.)
-4. capture error states within returned values
+Tips if reading: focus on the tests and how they are structured and organized; don't 
+read too much into the `SquareBoard` builder class (not exactly clearly written) or the 
+`compute` method -- which makes extensive use functional list operations (like fold). 
 
-In practice, there are few exceptions to these rules in *this* branch. Namely:
-the `ValidatingBoardBuilder` and the entirety of the `Cli` (command-line-interface)
-class. I have a byzantine++ solution hidden in another branch that *I think* avoids 
-all mutation (could be wrong).
+### jdk23 things
 
 Most of the data structures are modeled "algebraically" as a sealed interface
 type consisting of some number of implementing types (records/constructors).
@@ -102,8 +98,7 @@ This type of pattern matching is used throughout -- the pattern/switch match wil
 expression "implementing" a given method.
 
 Some of the data structures used in here (for encapsulating either a success value or a failure encountered) are very 
-weird (re: the `Result` type from the immutableadts pkg). Perhaps the most byzantine part here... It's a riff 
-on Haskell's Result ADT: https://en.wikipedia.org/wiki/Result_type
+weird (re: the `Result` type from the immutableadts pkg). Perhaps the most byzantine part here... 
 
 ### persistent collections
 
@@ -111,10 +106,13 @@ The immutable collections framework, [vavr](https://github.com/vavr-io/vavr) is
 used here to provide drop-in (immutable) replacements for all the standard
 (mutable) Java collections.
 
-We primarily make use of its copy-on-write `Vector` type, which we wrap in a `Row` ...
-(where four `Row`s make up a `NonEmptyBoard` object). And though vavr's vector
-type is slower with $O(log n)$ `get(i)` (access) calls than the mutable
-standard `ArrayList` which is constant -- $O(1)$ ... this is good enough (4x4) as our boards are
+This library gives us collections with many of the 'standard' functional operators:
+* `map`, `filter`, `foldLeft`, etc.
+
+Mostly make use of `vavr`s copy-on-write `Vector` type, which we wrap in a `Row` ...
+(where four `Row`s make up a `NonEmptyBoard` object). And though this vector
+type is slower with $O(log n)$ `get(i)` (access) calls than a standard mutable
+`ArrayList` which is constant -- $O(1)$ ... this is good enough (4x4) as our boards are
 small + `Vector` is fully immutable.
 
 By the $log_2$ function, I guess we'd only start paying somewhat larger runtime
@@ -132,5 +130,5 @@ algorithms with $log$ -based runtimes are highly scalable (even as they grow to 
 massive amounts of data).
 
 We will get to trees soon. There are lots of great examples of tree structures amenable
-to immutability; including those as well as that are better off (performance wise)
+to immutability; including many as well that are better off hands down (performance wise)
 remaining mutable.

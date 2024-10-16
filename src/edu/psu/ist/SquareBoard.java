@@ -28,17 +28,30 @@ public final class SquareBoard {
         return rows.get(row).get(col);
     }
 
+    /**
+     * Returns a new board with {@code row,col} updated to the provided
+     * {@code tile} type.
+     * <p>
+     * precondition: 0 <= row, col <= {@link #dimension() - 1} and
+     *          that if the provided tile is uncovered, it contains a
+     *          positive number
+     */
     public SquareBoard withUpdatedTile(int row, int col, TileType tile) {
         var updatedRow = rows.get(row).update(col, tile);
         return new SquareBoard(rows.update(row, updatedRow));
     }
 
-    // this method allows you to fold each row of this board into a single
-    // value of type A
-
     /**
      * Left-folds the rows of this board into a single value {@code A} using
      * the provided binary function {@code f}.
+     * <p>
+     * Can think of this operation as enabling users of this class to
+     * issue arbitrary queries to this board -- like "how many mines are there"
+     * via the function {@code f}.
+     * <p>
+     * This way we don't need to offer a bunch of one off (basically samey) methods
+     * like: mineCount(), safeCount(), howManyUncovered(), etc. as this compute
+     * method generalizes/subsumes them all.
      */
     public <A> A compute(A start, BiFunction<TileType, A, A> f) {
         return rows.foldLeft(start, (a, row) ->

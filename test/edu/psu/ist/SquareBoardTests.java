@@ -52,8 +52,7 @@ public final class SquareBoardTests {
             case TileType.Mine _ -> x + 1;
             default -> x;
         };
-        var uncoveredCt = board.compute(0, f);
-        Assertions.assertEquals(3, uncoveredCt);
+        Assertions.assertEquals(3, board.compute(0, f));
         // --
 
         // how many hidden tiles?
@@ -61,20 +60,32 @@ public final class SquareBoardTests {
             case Hidden _ -> x + 1;
             default -> x;
         };
-        var uncoveredCt2 = board.compute(0, f);
-        Assertions.assertEquals(1, uncoveredCt2);
+        Assertions.assertEquals(1, board.compute(0, f));
         // --
     }
 
     @Test public void testFold03() {
+
+        var boardRes = new SquareBoard.ValidatingBoardBuilder() //
+                .row(mine(), un(2), hidden()) //
+                .row(un(3), un(0), mine()) //
+                .row(un(3), mine(), un(0)) //
+                .build();
+        Assertions.assertTrue(boardRes.isOk());
+        var board = boardRes.get();
 
         // sum of all uncovered tiles?
         BiFunction<TileType, Integer, Integer> f = (tile, x) -> switch (tile) {
             case Uncovered(var ct) -> ct + x;
             default -> x;
         };
-        var uncoveredCt3 = boardRes.get().compute(0, f);
-        boardRes = boardRes.get().withUpdatedTile() Assertions.assertEquals(8, uncoveredCt3);
+        Assertions.assertEquals(8, board.compute(0, f));
+        // now decrement one of the uncovered cells
+        board = board.withUpdatedTile(2, 0, un(2)) ;
+
+        Assertions.assertEquals(7, board.compute(0, f));
+
+        board = board.withUpdatedTile(2, 0, un(2)) ;
     }
 
 }
