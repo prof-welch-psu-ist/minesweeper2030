@@ -7,11 +7,11 @@ import java.util.function.BiFunction;
 
 import static edu.psu.ist.TileType.*;
 
-public final class SquareBoardTests {
+public final class BoardComputeTests {
 
     @Test public void testFold01() {
 
-        var boardRes = new SquareBoard.ValidatingBoardBuilder()
+        var boardRes = new SquareBoard.ValidatingBoardBuilder() //
                 .row(mine(), un(2)) //
                 .row(un(3), un(0)) //
                 .build();
@@ -24,7 +24,7 @@ public final class SquareBoardTests {
         // work here if initializing said variable to a lambda expression
         BiFunction<TileType, Integer, Integer> f = (tile, x) -> switch (tile) {
             case Uncovered _ -> x + 1;
-            default         -> x;
+            default -> x;
         };
         var uncoveredCt = board.compute(0, f);
         Assertions.assertEquals(3, uncoveredCt);
@@ -79,13 +79,33 @@ public final class SquareBoardTests {
             case Uncovered(var ct) -> ct + x;
             default -> x;
         };
+        // assert sum of all uncovered squares is 8
         Assertions.assertEquals(8, board.compute(0, f));
-        // now decrement one of the uncovered cells
-        board = board.withUpdatedTile(2, 0, un(2)) ;
+        Assertions.assertEquals("""
+                * 2 _
+                3 0 *
+                3 * 0
+                """.trim(), board.toString());
+
+        // now decrement one of the uncovered cells by one
+        board = board.withUpdatedTile(2, 0, un(2));
+        Assertions.assertEquals("""
+                * 2 _
+                3 0 *
+                2 * 0
+                """.trim(), board.toString());
 
         Assertions.assertEquals(7, board.compute(0, f));
 
-        board = board.withUpdatedTile(2, 0, un(2)) ;
+        board = board.withUpdatedTile(2, 0, un(0));
+        Assertions.assertEquals("""
+                * 2 _
+                3 0 *
+                0 * 0
+                """.trim(), board.toString());
+
+        // count should drop from 7 to 5
+        Assertions.assertEquals(5, board.compute(0, f));
     }
 
 }
