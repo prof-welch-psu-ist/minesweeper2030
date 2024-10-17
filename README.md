@@ -102,7 +102,26 @@ will generally just be the singular expression "implementing" a given method.
 
 Some of the data structures used in here (for encapsulating either a success 
 value or a failure encountered) are very weird (re: the `Result` type from the 
-immutableadts pkg). Perhaps the most byzantine part here... 
+immutableadts pkg). 
+
+Perhaps the most byzantine part here: the use of types like these to encapsulate 
+"bad" or "erroneous" values from functions. E.g., instead of `div(2, 0)` throwing 
+an illegal argument exception (which is 'impure' as it has an effect to IO -- 
+the console), in this style `div` would return a `Result<Int, ErrMsg>` where error 
+msg is perhaps some other specialized type for describing the exact calamitous outcome 
+that results from trying to divide by 0. 
+
+This not only forces client calling code to explicitly respond to the possibility 
+of errors. It also heavily leans on (in our case, the Java compiler's) static 
+type checker to rule out -- at compile time -- bad state from creeping into the 
+program from unexpected sources... like runtime exceptions (which would normally happen 
+if someone where to try dividing by 0). 
+
+> TLDR: under this style, errors are explicitly returned as part 
+of the return value of a function (as opposed to some random exception getting 
+thrown within the body).The idea is to use the language's static type system to 
+make "bad state" less easily represented (or not at all manifest) within the 
+program
 
 ### persistent collections
 

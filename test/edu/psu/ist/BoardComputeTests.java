@@ -22,17 +22,17 @@ public final class BoardComputeTests {
         // define a small function to count the number of uncovered tiles
         // note: local variable type inference ('var') doesn't
         // work here if initializing said variable to a lambda expression
-        BiFunction<TileType, Integer, Integer> f = (tile, x) -> switch (tile) {
-            case Uncovered _ -> x + 1;
-            default -> x;
+        BiFunction<TileType, Integer, Integer> f = (tile, acc) -> switch (tile) {
+            case Uncovered _    -> acc + 1; // acc = short for: accumulator
+            default             -> acc;
         };
         var uncoveredCt = board.compute(0, f);
         Assertions.assertEquals(3, uncoveredCt);
 
         // now count the uncovered tiles containing mine counts == 3
-        f = (tile, x) -> switch (tile) {
-            case Uncovered(var ct) when ct == 3 -> x + 1;
-            default -> x;
+        f = (tile, acc) -> switch (tile) {
+            case Uncovered(var ct) when ct == 3 -> acc + 1;
+            default                             -> acc;
         };
         var uncoveredCt2 = board.compute(0, f);
         Assertions.assertEquals(1, uncoveredCt2);
@@ -48,16 +48,16 @@ public final class BoardComputeTests {
         var board = boardRes.get(); // assert above means its safe here to unwrap the board
 
         // how many mines?
-        BiFunction<TileType, Integer, Integer> f = (tile, x) -> switch (tile) {
-            case TileType.Mine _ -> x + 1;
-            default -> x;
+        BiFunction<TileType, Integer, Integer> f = (tile, acc) -> switch (tile) {
+            case TileType.Mine _ -> acc + 1;
+            default              -> acc;
         };
         Assertions.assertEquals(3, board.compute(0, f));
 
         // how many hidden tiles?
-        f = (tile, x) -> switch (tile) {
-            case Hidden _ -> x + 1;
-            default -> x;
+        f = (tile, acc) -> switch (tile) {
+            case Hidden _   -> acc + 1;
+            default         -> acc;
         };
         Assertions.assertEquals(1, board.compute(0, f));
     }
@@ -73,9 +73,9 @@ public final class BoardComputeTests {
         var board = boardRes.get();
 
         // sum of all uncovered tiles?
-        BiFunction<TileType, Integer, Integer> f = (tile, x) -> switch (tile) {
-            case Uncovered(var ct) -> ct + x;
-            default -> x;
+        BiFunction<TileType, Integer, Integer> f = (tile, acc) -> switch (tile) {
+            case Uncovered(var ct) -> ct + acc;
+            default                -> acc;
         };
         // assert sum of all uncovered squares is 8
         Assertions.assertEquals(8, board.compute(0, f));

@@ -47,7 +47,9 @@ public final class SquareBoard {
      * <p>
      * Can think of this operation as enabling users of this class to
      * issue arbitrary queries to this board -- like "how many mines are there"
-     * via the function {@code f}.
+     * via the function {@code f}. These queries essentially allow you to
+     * "collapse" or 'fold' the board and its rows into a single value of type
+     * {@code A}.
      * <p>
      * This way we don't need to offer a bunch of one off (basically samey) methods
      * like: mineCount(), safeCount(), howManyUncovered(), etc. as this compute
@@ -57,7 +59,7 @@ public final class SquareBoard {
         return rows.foldLeft(start, (a, row) ->
                         row.columns().foldLeft(a,
                                 (a1, tile) -> f.apply(tile, a1)));
-        //imperative way:
+        //alternative (more familiar) imperative way:
         //var result = start;
         //for (var row : rows) {
         //  for (var tileTpe : row.columns()) {
@@ -89,6 +91,8 @@ public final class SquareBoard {
          */
         private final ArrayList<Vector<Result<TileType, String>>> mutRows = new ArrayList<>();
 
+        // nb: TileType... tpes is "syntactic" sugar for an array of
+        // TileTypes: TileType[]
         public ValidatingBoardBuilder row(TileType... tpes) {
 
             var converted = Vector.of(tpes) //
@@ -98,12 +102,23 @@ public final class SquareBoard {
             return this;
         }
 
-        public ValidatingBoardBuilder row(char ... cs) {
-
+        public ValidatingBoardBuilder row(String rowText) {
+            return row(rowText.toCharArray());
         }
 
-        public ValidatingBoardBuilder row(Character... cs) {
-            var converted = Vector.of(cs) //
+        public ValidatingBoardBuilder row(char ... cs) {
+            var boxedCsArray = new Character[cs.length];
+            // need this since java autoboxing doesn't work for arrays of
+            // some primitive type. E.g.: int[] won't get auto-boxed to Integer[]
+            // Has to do with differences in memory layouts
+            // between primitively typed arrays vs those of some reference (boxed) type.
+            // e.g.: byte[] is an array of primitively type byte values (so each value
+            // is represented using 8 bits). But the boxed version, Byte[] would
+            // be forced to store all 32-bit wide references to Byte objects
+            for (int i = 0; i < boxedCsArray.length; i++) {
+                boxedCsArray[i] = cs[i];
+            }
+            var converted = Vector.of(boxedCsArray) //
                     .map(Object::toString) //
                     .map(ValidatingBoardBuilder::tryToConvertCellText);
             mutRows.add(converted);
