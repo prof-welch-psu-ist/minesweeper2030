@@ -1,6 +1,6 @@
 ## A byzantine minesweeper2030 approach
 
-> NOTE: not intended in any way to be a solution I'd expect one to arrive at
+> NOTE: not intended to be a serious solution 
 
 It is mostly an (ill-advised) attempt to utilize some newer Java language 
 features, including:
@@ -41,8 +41,9 @@ public sealed interface TileType {
     } 
     record Uncovered(int count) implements TileType {}
 ```
-The "clever" thing with the first (clearer) snippet is that enums are actually 
-java's first class language mechanism for expressing singleton objects....
+The "clever" thing with the first (and, in my opinion, clearer) snippet is that 
+enums are actually java's first class language mechanism for expressing 
+singleton objects....
 
 [Scala](https://www.scala-lang.org/) is an example of JVM-based language that is functional-first
 (somewhat closely related in lineage to Java) that has "true" first class support for 
@@ -91,16 +92,17 @@ Fun fact: the ability to pattern match on arbitrary subtypes (not to mention dec
 has basically rendered the entire (longstanding) gang-of-four ["visitor pattern"](https://en.wikipedia.org/wiki/Visitor_pattern) 
 nearly obsolete. 
 
-So pattern matching is cool example of how OOP design patterns can be rendered obsolete with the addition of new 
-first-class language features. 
+So pattern matching is cool example of how OOP design patterns can be rendered 
+obsolete with the addition of new first-class language features. 
 
 ### Handling errors
 
-This type of pattern matching is used throughout -- the pattern/switch match will generally just be the singular 
-expression "implementing" a given method.
+This type of pattern matching is used throughout -- the pattern/switch match 
+will generally just be the singular expression "implementing" a given method.
 
-Some of the data structures used in here (for encapsulating either a success value or a failure encountered) are very 
-weird (re: the `Result` type from the immutableadts pkg). Perhaps the most byzantine part here... 
+Some of the data structures used in here (for encapsulating either a success 
+value or a failure encountered) are very weird (re: the `Result` type from the 
+immutableadts pkg). Perhaps the most byzantine part here... 
 
 ### persistent collections
 
@@ -112,7 +114,7 @@ This library gives us collections with many of the 'standard' functional operato
 * `map`, `filter`, `foldLeft`, etc.
 
 Mostly make use of `vavr`s copy-on-write `Vector` type, which we wrap in a `Row` ...
-(where four `Row`s make up a `NonEmptyBoard` object). And though this vector
+where n `Row`s make up a (NxN) `SquareBoard` object. And though this vector
 type is slower with $O(log n)$ `get(i)` (access) calls than a standard mutable
 `ArrayList` which is constant -- $O(1)$ ... this is good enough (4x4) as our boards are
 small + `Vector` is fully immutable.
@@ -132,5 +134,5 @@ algorithms with $log$ -based runtimes are highly scalable (even as they grow to 
 massive amounts of data).
 
 We will get to trees soon. There are lots of great examples of tree structures amenable
-to immutability; including many as well that are better off hands down (performance wise)
-remaining mutable.
+to immutability; including many others that are more naturally mutable:
+from both a performance and implementation-simplicity perspective (heaps come to mind here).

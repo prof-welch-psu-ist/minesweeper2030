@@ -29,7 +29,7 @@ public record Row(int rowNum, Vector<TileType> columns) {
         // can also do (since vavr collections offer a nice string delimiter method)
         return columns.map(TileType::cellAsString)
                       .mkString(" ");
-        // more traditional way:
+        // traditional way:
         /*var first = true;
         var sb = new StringBuilder();
         for (var tile : columns) {

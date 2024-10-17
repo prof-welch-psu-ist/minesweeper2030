@@ -57,7 +57,7 @@ public final class SquareBoard {
         return rows.foldLeft(start, (a, row) ->
                         row.columns().foldLeft(a,
                                 (a1, tile) -> f.apply(tile, a1)));
-        //could also be written more imperatively using loops like so:
+        //imperative way:
         //var result = start;
         //for (var row : rows) {
         //  for (var tileTpe : row.columns()) {
@@ -98,8 +98,12 @@ public final class SquareBoard {
             return this;
         }
 
-        public ValidatingBoardBuilder row(Character... ts) {
-            var converted = Vector.of(ts) //
+        public ValidatingBoardBuilder row(char ... cs) {
+
+        }
+
+        public ValidatingBoardBuilder row(Character... cs) {
+            var converted = Vector.of(cs) //
                     .map(Object::toString) //
                     .map(ValidatingBoardBuilder::tryToConvertCellText);
             mutRows.add(converted);

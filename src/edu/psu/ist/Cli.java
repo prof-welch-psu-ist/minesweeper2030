@@ -5,6 +5,7 @@ import java.util.Scanner;
 public final class Cli {
 
     public static final String Banner = String.format("Minesweeper 2030 (version: %s)", Version.Current);
+
     public static void main(String[] args) {
 
         System.out.println(Cli.Banner);
@@ -13,8 +14,11 @@ public final class Cli {
         var builder = new SquareBoard.ValidatingBoardBuilder();
 
         while (true) {
-            System.out.println("enter a square board (no spaces) one row at a time");
+            System.out.println("enter a square board (no spaces) one row at " +
+                    "a time (type q to Quit)");
             var line = scanner.nextLine();
+            builder.row(line.toCharArray());
+
             //builder.row(line.chars().mapToObj(c -> (char) c).toList());
             //builder.row(scanner.nextLine());
             break;

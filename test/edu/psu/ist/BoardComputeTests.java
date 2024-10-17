@@ -53,7 +53,6 @@ public final class BoardComputeTests {
             default -> x;
         };
         Assertions.assertEquals(3, board.compute(0, f));
-        // --
 
         // how many hidden tiles?
         f = (tile, x) -> switch (tile) {
@@ -61,7 +60,6 @@ public final class BoardComputeTests {
             default -> x;
         };
         Assertions.assertEquals(1, board.compute(0, f));
-        // --
     }
 
     @Test public void testFold03() {
@@ -107,5 +105,4 @@ public final class BoardComputeTests {
         // count should drop from 7 to 5
         Assertions.assertEquals(5, board.compute(0, f));
     }
-
 }
