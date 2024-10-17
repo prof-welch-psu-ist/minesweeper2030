@@ -92,7 +92,7 @@ Fun fact: the ability to pattern match on arbitrary subtypes (not to mention dec
 has basically rendered the entire (longstanding) gang-of-four ["visitor pattern"](https://en.wikipedia.org/wiki/Visitor_pattern) 
 nearly obsolete. 
 
-So pattern matching is cool example of how OOP design patterns can be rendered 
+So pattern matching is a cool example of how OOP design patterns can be rendered 
 obsolete with the addition of new first-class language features. 
 
 ### Handling errors
