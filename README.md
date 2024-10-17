@@ -1,7 +1,9 @@
 ## A byzantine minesweeper2030 approach
 
-This is by no means high quality code -- mostly an attempt to utilize some 
-newer Java language features, including:
+> NOTE: not intended in any way to be a solution I'd expect one to arrive at
+
+It is mostly an (ill-advised) attempt to utilize some newer Java language 
+features, including:
 * record types
 * sealed interfaces and records as well as design patterns like singletons 
 to represent certain (duplicated) square types that make up the board.
