@@ -73,12 +73,12 @@ public final class BoardComputeTests {
         var board = boardRes.get();
 
         // sum of all uncovered tiles?
-        BiFunction<TileType, Integer, Integer> addAllUncoveredFn = (tile, acc) -> switch (tile) {
+        BiFunction<TileType, Integer, Integer> f = (tile, acc) -> switch (tile) {
             case Uncovered(var ct) -> ct + acc;
             default -> acc;
         };
         // assert sum of all uncovered squares is 8
-        Assertions.assertEquals(8, board.compute(0, addAllUncoveredFn));
+        Assertions.assertEquals(8, board.compute(0, f));
         Assertions.assertEquals("""
                 * 2 _
                 3 0 *
@@ -94,7 +94,7 @@ public final class BoardComputeTests {
                 """.trim(), board.toString());
 
         // now the sum of all uncovered squares is 7...
-        Assertions.assertEquals(7, board.compute(0, addAllUncoveredFn));
+        Assertions.assertEquals(7, board.compute(0, f));
 
         board = board.withUpdatedTile(2, 0, un(0));
         Assertions.assertEquals("""
@@ -104,6 +104,6 @@ public final class BoardComputeTests {
                 """.trim(), board.toString());
 
         // now count should drop from 7 to 5
-        Assertions.assertEquals(5, board.compute(0, addAllUncoveredFn));
+        Assertions.assertEquals(5, board.compute(0, f));
     }
 }
