@@ -43,7 +43,17 @@ public final class Cli {
     /**
      * Attempts to load the board from a text file; returns a string of error
      * messages if this fails (the board contained is bad,
-     * the file fails to load, etc.)
+     * the file fails to load, etc.). Otherwise, returns a result containing a
+     * fairly well-formed board ... square, all tile types valid. That said:
+     * the loaded board might be <em>semantically</em> nonsensical, e.g.:
+     * <pre><code>
+     *     0*0
+     *     000
+     *     000
+     * </code></pre>
+     * Here, the cells around the mine should have a mine count of 1. This method
+     * will happily load this representation. Though it objects when there is a
+     * <em>syntactically</em> invalid
      */
     public static Result<SquareBoard, String> loadFromFile(Path p) {// not used atm
         try (var scan = new Scanner(p.toFile())) {
