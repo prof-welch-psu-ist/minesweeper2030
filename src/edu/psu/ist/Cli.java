@@ -53,7 +53,7 @@ public final class Cli {
      * </code></pre>
      * Here, the cells around the mine should have a mine count of 1. This method
      * will happily load this representation. Though it objects when there is a
-     * <em>syntactically</em> invalid
+     * <em>syntactically</em> invalid board in the file.
      */
     public static Result<SquareBoard, String> loadFromFile(Path p) {// not used atm
         try (var scan = new Scanner(p.toFile())) {

@@ -1,9 +1,11 @@
 ## A byzantine minesweeper2030 approach
 
-> NOTE: not intended to be a serious solution 
+> NOTE: not intended to be a serious solution (just one that deliberately attempts 
+> to obtain a [pure functional](https://en.wikipedia.org/wiki/Purely_functional_programming) 
+> jdk 23 sanctioned(?) [codegolf](https://en.wikipedia.org/wiki/Code_golf) solution)
 
 It is mostly an (ill-advised) attempt to utilize some newer Java language 
-features, including:
+features + functional programming, including:
 * record types
 * sealed interfaces and records as well as design patterns like singletons 
 to represent certain (duplicated) square types that make up the board.
@@ -13,6 +15,13 @@ to represent certain (duplicated) square types that make up the board.
 Tips if reading: focus on the tests and how they are structured and organized; don't 
 read too much into the `SquareBoard` builder class (not exactly clearly written) or the 
 `compute` method -- which makes extensive use functional list operations (like fold). 
+
+### goals:
+
+* everything is immutable
+* errors are explicitly handled without exceptions
+* builders to validate/ensure objects are initialized in a valid (immutable) state
+* data types and operations are generalized for flexibility (re: `compute` fn in `SquareBoard`)
 
 ### jdk23 things
 
@@ -45,9 +54,10 @@ The "clever" thing with the first (and, in my opinion, clearer) snippet is that
 enums are actually java's first class language mechanism for expressing 
 singleton objects....
 
-[Scala](https://www.scala-lang.org/) is an example of JVM-based language that is functional-first
-(somewhat closely related in lineage to Java) that has "true" first class support for 
-singleton types. Here's how the algebraic type for `TileType` would look in scala 3:
+[Scala](https://www.scala-lang.org/), a JVM-based language released in ~2009 that embraces a functional 
+programming OO-mixture approach, is  an example of JVM-based language that that 
+has "true" first class support for singleton types. Here's how the algebraic 
+type for `TileType` would look in scala 3:
 ```scala 3
 sealed trait TileType // traits are like interfaces in Java (applies to: `sealed` too)
 object TileType:
@@ -55,6 +65,9 @@ object TileType:
   case object Hidden extends TileType
   case class Uncovered(count: Int) extends TileType // case class == java record types
 ```
+
+Note the similarity between the `sealed interface` jdk23 approach and the scala
+approach above.
 
 Modeling the various types of tiles that comprise the board allows you to 
 "pattern match". A feature just added to Java in Sept 2023, e.g.:
@@ -90,7 +103,7 @@ Can read more about this at the actual JDK proposal docs:
 
 Fun fact: the ability to pattern match on arbitrary subtypes (not to mention deconstructing them as shown above)
 has basically rendered the entire (longstanding) gang-of-four ["visitor pattern"](https://en.wikipedia.org/wiki/Visitor_pattern) 
-nearly obsolete. 
+nearly obsolete (in many cases -- we'll consider an example in a future PA perhaps). 
 
 So pattern matching is a cool example of how OOP design patterns can be rendered 
 obsolete with the addition of new first-class language features. 
@@ -101,10 +114,10 @@ This type of pattern matching is used throughout -- the pattern/switch match
 will generally just be the singular expression "implementing" a given method.
 
 Some of the data structures used in here (for encapsulating either a success 
-value or a failure encountered) are very weird (re: the `Result` type from the 
-immutableadts pkg). 
+value or a failure encountered) are perhaps the most unfamiliar concepts, 
+e.g.: the `Result` type from the immutableadts pkg). 
 
-Perhaps the most byzantine part here: the use of types like these to encapsulate 
+Perhaps the most 'byzantine' part here: the use of types like these to encapsulate 
 "bad" or "erroneous" values from functions. E.g., instead of `div(2, 0)` throwing 
 an illegal argument exception (which is 'impure' as it has an effect to IO -- 
 the console), in this style `div` would return a `Result<Int, ErrMsg>` where error 
