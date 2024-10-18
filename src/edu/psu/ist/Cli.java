@@ -34,7 +34,7 @@ public final class Cli {
         switch (initialBoard) {
             case Result.Ok(var b) -> {
                 System.out.println(b.toString());
-
+                MinesweeperGame g = new MinesweeperGame(b);
             }
             case Result.Err(var err) -> System.out.println(err);
         }
