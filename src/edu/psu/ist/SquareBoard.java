@@ -59,7 +59,7 @@ public final class SquareBoard {
         return rows.foldLeft(start, (a, row) ->
                         row.columns().foldLeft(a,
                                 (a1, tile) -> f.apply(tile, a1)));
-        //alternative (more familiar) imperative way:
+        //alternative (far more familiar) imperative way:
         //var result = start;
         //for (var row : rows) {
         //  for (var tileTpe : row.columns()) {

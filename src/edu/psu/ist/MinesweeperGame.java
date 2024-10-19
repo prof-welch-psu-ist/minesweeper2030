@@ -3,8 +3,9 @@ package edu.psu.ist;
 import edu.psu.ist.TileType.Mine;
 import edu.psu.ist.TileType.Hidden;
 import edu.psu.ist.immutableadts.Pair;
-import edu.psu.ist.immutableadts.Result;
 import io.vavr.collection.Vector;
+
+import java.util.function.BiFunction;
 
 import static edu.psu.ist.TileType.*;
 
@@ -36,27 +37,21 @@ public final class MinesweeperGame {
      * board from steps 1-4.
      */
     public MinesweeperGame() {
-        board = new SquareBoard.ValidatingBoardBuilder()
-                .row(hidden(), hidden(), mine(), hidden())
-                .row(hidden(), hidden(), mine(), hidden())
-                .row(hidden(), hidden(), hidden(), hidden())
-                .row(hidden(), hidden(), hidden(), hidden())
-                .build().get();
+        board = new SquareBoard.ValidatingBoardBuilder().row(hidden(), hidden(), mine(), hidden()).row(hidden(),
+                hidden(), mine(), hidden()).row(hidden(), hidden(), hidden(), hidden()).row(hidden(), hidden(),
+                hidden(), hidden()).build().get();
     }
 
     /** Returns the type of tile located at: row,col. */
-    public TileType computeSquare(int row, int col) {
-        if (row < 0 || row > 3 || col < 0 || col > 3) {
-            throw new IllegalArgumentException("row and column must be between 0-" + (board.dimension() - 1));
-        }
+    public TileType revealSquare(int row, int col) {
         // first: query the board to see what tile type exists at (row, col)
         TileType tpe = board.tileAt(row, col);
 
         // match on whatever type of tile was selected:
         return switch (tpe) {
-            case Mine.MineInst          -> mine();
-            case TileType.Uncovered t   -> t;
-            case Hidden.HiddenInst      -> {
+            case Mine.MineInst -> mine();
+            case TileType.Uncovered t -> t;
+            case Hidden.HiddenInst -> {
                 int adjacentMines = adjacentMineCount(row, col);
                 yield new Uncovered(adjacentMines);
             }
@@ -69,14 +64,14 @@ public final class MinesweeperGame {
      */
     public void advanceGame(int row, int col) {
         // compute the tile selected by row,col
-        var tpe = computeSquare(row, col);
+        var tpe = revealSquare(row, col);
         board = updateBoard(row, col, tpe);
     }
 
     public boolean shouldAdvanceGame(int row, int col) {
-        return switch (computeSquare(row, col)) {
+        return switch (revealSquare(row, col)) {
             case Mine _ -> false;
-            default     -> true;
+            default -> true;
         };
     }
 
@@ -121,14 +116,35 @@ public final class MinesweeperGame {
      * </code></pre>
      */
     public SquareBoard updateBoard(int row, int col, TileType updateTpe) {
-        if (row < 0 || row > board.dimension()) {
-            throw new IllegalArgumentException("not right");
-        }
         return board.withUpdatedTile(row, col, updateTpe);
     }
 
     /** Returns true only if {@code 0 <= row, col <= 3}; false otherwise. */
     private boolean inBounds(int row, int col) {
         return row >= 0 && row <= 3 && col >= 0 && col <= 3;
+    }
+
+    public String renderGameState() {
+        // queries the board to see how many mines
+        var mineCount = board.compute(0, (tile, acc) -> switch (tile) {
+            case Mine _ -> acc + 1;
+            default -> acc;
+        });
+        // how many remaining hidden squares?
+        var hiddenCt = board.compute(0, (tile, acc) -> switch (tile) {
+            case Hidden _ -> acc + 1;
+            default -> acc;
+        });
+
+        return String.format("""
+                %s
+                mine ct: %d
+                remaining hidden ct: %d
+                """.trim(), mineCount, hiddenCt);
+    }
+
+    // just renders the board
+    @Override public String toString() {
+        return board.toString();
     }
 }

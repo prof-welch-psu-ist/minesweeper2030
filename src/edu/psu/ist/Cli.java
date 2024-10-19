@@ -2,9 +2,9 @@ package edu.psu.ist;
 
 import edu.psu.ist.immutableadts.Pair;
 import edu.psu.ist.immutableadts.Result;
-import io.vavr.collection.Vector;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Scanner;
 
@@ -22,21 +22,53 @@ public final class Cli {
             """);
 
     public static void main(String[] args) {
-
         System.out.println(Cli.Banner);
+        var scan = new Scanner(System.in);
 
-        var scanner = new Scanner(System.in);
+        if (args.length == 0) {
+            System.out.println("no file passed in, playing sample board");
+            var loadRes = loadFromString(ExBoard01.exampleBoardText);
+            doStartGame(scan, loadRes);
+        } else {
+            var loadRes = loadFromFile(args[0]);
+            doStartGame(scan, loadRes);
+        }
     }
 
-    private static void doExampleBoard(ExampleBoard ex) {
-        System.out.println("Loading example board: " + ex.num + "...");
-        var initialBoard = loadFromString(ex.exampleBoardText);
-        switch (initialBoard) {
+    /**
+     * Given a scanner and a (potentially) loaded board, starts the game, or,
+     * if an {@link Result.Err} is passed, prints the cause of the load failure
+     * and exits.
+     */
+    private static void doStartGame(Scanner scan, Result<SquareBoard, String> loadRes) {
+        switch (loadRes) {
             case Result.Ok(var b) -> {
                 System.out.println(b.toString());
                 MinesweeperGame g = new MinesweeperGame(b);
+                doLoop(scan, g);
             }
-            case Result.Err(var err) -> System.out.println(err);
+            case Result.Err(var err) -> System.err.println(err);
+        }
+    }
+
+    private static void doLoop(Scanner scan, MinesweeperGame g) {
+        System.out.println("enter a row,col number (1-indexed, ex: 1,4) - type q to quit");
+        var rawInput = scan.nextLine();
+        var parsedInput = parseInputText(rawInput);
+
+        switch (parsedInput) {
+            case Result.Ok(Pair(var row, var col)) -> {
+
+                if (g.shouldAdvanceGame(row, col)) {
+                    g.advanceGame(row, col);
+                    System.out.println(g.renderGameState());
+                } else {
+                    System.out.println("you lose");
+                }
+            }
+            case Result.Err(var msg) when msg.equalsIgnoreCase("q") ->
+                    System.out.println("good game");
+            default -> System.err.println("bad input");
         }
     }
 
@@ -55,11 +87,13 @@ public final class Cli {
      * will happily load this representation. Though it objects when there is a
      * <em>syntactically</em> invalid board in the file.
      */
-    public static Result<SquareBoard, String> loadFromFile(Path p) {// not used atm
-        try (var scan = new Scanner(p.toFile())) {
+    public static Result<SquareBoard, String> loadFromFile(String fileName) {// not used atm
+        try (var scan = new Scanner(Path.of(fileName))) {
             return processBoardFromScanner(scan);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             return Result.err(e.getMessage());
+        } catch (InvalidPathException e) {
+            return Result.err("bad file path: " + fileName);
         }
     }
 
@@ -79,41 +113,7 @@ public final class Cli {
         return builder.build();
     }
 
-/*    private void doLoop(Scanner scan, SquareBoard b) {
-        System.out.println("enter a row,col number (1-indexed, ex: 1,4) - type q to quit");
-        var rawInput = scan.nextLine();
-        var parsedInput = parseInputText(rawInput);
-
-        switch (parsedInput) {
-            // case 0a: the cell is valid, uncover it on the board
-            case Validation.Success(Pair(var row, var col)) -> {
-                // note: - 1 to adjust for the public-facing CLI indexing
-                var updatedBoardVal = reveal(b, row - 1, col - 1);
-                switch (updatedBoardVal) {
-                    // case 1: the board is valid and all moves thus far have been valid,
-                    //          so keep looping (revealing squares)
-                    case Validation.Success(var nextBoard) -> doLoop(scan, nextBoard);
-
-                    // case 2: board is in a winning configuration, so return
-                    case Validation.SoftFailure(var finalBoard, var msgs) when isWin(msgs) ->
-                            Validation.softFail(finalBoard, GameMessage.WinMessage.Instance);
-
-                    // case 3: board is in a loss configuration
-                    case Validation.SoftFailure(var finalBoard, var msgs) when isLoss(msgs) ->
-                            Validation.softFail(finalBoard, GameMessage.LoseMessage.Instance);
-
-                    // case 4: bad moves that resulted in failing boards
-                    case Validation.SoftFailure(_, var msgs) -> Validation.hardFail(msgs);
-                    case Validation.HardFailure(var errs) -> Validation.hardFail(errs);
-                }
-            }
-            // case 0b: board is in a bad config report errors
-            case Validation.SoftFailure(_, var errs) -> Validation.hardFail(errs);
-            case Validation.HardFailure(var err) -> Validation.hardFail(err);
-        }
-    }*/
-
-    private Result<Pair<Integer, Integer>, String> parseInputText(String inputText) {
+    private static Result<Pair<Integer, Integer>, String> parseInputText(String inputText) {
         var parts = inputText.trim().split(",");
 
         if (parts.length != 2) {

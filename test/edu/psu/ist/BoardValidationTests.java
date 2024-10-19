@@ -70,7 +70,8 @@ public final class BoardValidationTests {
 
     @Test public void testValidBoards02() {
         // test some valid boards ... note when we say valid
-        // we do not mean: in a valid minesweeper *game* state
+        // we do not mean: in a valid minesweeper *game* state..
+        // just structurally valid w.r.t. tile types and dimension
         var b1 = new SquareBoard.ValidatingBoardBuilder() //
                 .row('_', '*') //
                 .row('_', '_').build();
