@@ -56,11 +56,14 @@ public final class Cli {
         System.out.println("enter a row,col number (1-indexed, ex: 1,4) - type "
                 + sentinelText + " to quit");
         var rawInput = scan.nextLine();
-        var parsedInput = parseInputText(rawInput, sentinelText.toLowerCase());
+        if (rawInput.equalsIgnoreCase("q")) {
+            System.out.println("quitting - good game");
+        }
+        var parsedInput = parseInputText(rawInput);
 
         switch (parsedInput) {
-            case Result.Ok(Pair(var row, var col)) when row < 0 || col < 0 ->
-                    System.out.println("good game");
+            case Result.Ok(_) when g.inWinState() ->
+                    System.out.println("you win!");
             case Result.Ok(Pair(var row, var col)) -> {
                 var row2 = row - 1;
                 var col2 = col - 1;
@@ -131,18 +134,17 @@ public final class Cli {
     /**
      * Returns an {@link Result.Ok} instance containing two positive
      * integers (if {@code inputText} matches the sentinel value, then returns
-     * a pair where one or both values are negative -- signaling halt/quit)
+     * a pair where one or both values are negative -- signaling halt/quit).
+     * NOTE/update: would probably be better not doing this sentinel stuff --
+     * just do it in the originating loop (this method does enough work as it is).
      * <p>
      * Returns an {@link Result.Err} instance in the event that
      * {@code inputText} is malformed.
      */
     private static Result<Pair<Integer, Integer>, String> parseInputText(
-            String inputText, String sentinelText) {
+            String inputText) {
         var parts = inputText.trim().split(",");
 
-        if (inputText.equals(sentinelText)) {
-            return Result.ok(Pair.of(-1, -1));
-        }
         if (parts.length != 2) {
             return Result.err("input must be in the format 'row,col' (no spaces)");
         }

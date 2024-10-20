@@ -5,8 +5,6 @@ import edu.psu.ist.TileType.Hidden;
 import edu.psu.ist.immutableadts.Pair;
 import io.vavr.collection.Vector;
 
-import java.util.function.BiFunction;
-
 import static edu.psu.ist.TileType.*;
 
 /**
@@ -68,11 +66,12 @@ public final class MinesweeperGame {
         board = updateBoard(row, col, tpe);
     }
 
-    public boolean shouldAdvanceGame(int row, int col) {
-        return switch (revealSquare(row, col)) {
-            case Mine _ -> false;
-            default -> true;
-        };
+    public boolean inWinState() {
+        var hiddenCount = board.compute(0, (t, acc) -> switch (t) {
+            case Hidden _ -> acc + 1;
+            default -> acc;
+        });
+        return hiddenCount == 0;
     }
 
     /**
