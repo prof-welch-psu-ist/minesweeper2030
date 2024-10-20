@@ -135,12 +135,13 @@ public final class MinesweeperGame {
             case Hidden _ -> acc + 1;
             default -> acc;
         });
+        var boardStr = this.toString();
 
         return String.format("""
                 %s
-                mine ct: %d
-                remaining hidden ct: %d
-                """.trim(), mineCount, hiddenCt);
+                mine ct: %s
+                remaining hidden ct: %s
+                """.trim(), boardStr, mineCount, hiddenCt);
     }
 
     // just renders the board

@@ -26,7 +26,7 @@ public final class Cli {
         var scan = new Scanner(System.in);
 
         if (args.length == 0) {
-            System.out.println("no file passed in, playing sample board");
+            System.out.println("no file passed in, playing sample board...");
             var loadRes = loadFromString(ExBoard01.exampleBoardText);
             doStartGame(scan, loadRes);
         } else {
@@ -43,8 +43,8 @@ public final class Cli {
     private static void doStartGame(Scanner scan, Result<SquareBoard, String> loadRes) {
         switch (loadRes) {
             case Result.Ok(var b) -> {
-                System.out.println(b.toString());
                 MinesweeperGame g = new MinesweeperGame(b);
+                System.out.println(g.renderGameState());
                 doLoop(scan, g);
             }
             case Result.Err(var err) -> System.err.println(err);
@@ -58,17 +58,22 @@ public final class Cli {
 
         switch (parsedInput) {
             case Result.Ok(Pair(var row, var col)) -> {
-
-                if (g.shouldAdvanceGame(row, col)) {
-                    g.advanceGame(row, col);
+                var row2 = row - 1;
+                var col2 = col - 1;
+                if (g.shouldAdvanceGame(row2, col2)) {
+                    g.advanceGame(row2, col2);
                     System.out.println(g.renderGameState());
+                    System.out.println();
                 } else {
                     System.out.println("you lose");
                 }
             }
             case Result.Err(var msg) when msg.equalsIgnoreCase("q") ->
                     System.out.println("good game");
-            default -> System.err.println("bad input");
+            default -> {
+                System.err.println("bad input");
+                doLoop(scan, g); // loop again
+            }
         }
     }
 
@@ -89,6 +94,9 @@ public final class Cli {
      */
     public static Result<SquareBoard, String> loadFromFile(String fileName) {// not used atm
         try (var scan = new Scanner(Path.of(fileName))) {
+            if (!fileName.endsWith(".swp")) {
+                return Result.err("file must end in a .swp extension");
+            }
             return processBoardFromScanner(scan);
         } catch (IOException e) {
             return Result.err(e.getMessage());
