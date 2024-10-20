@@ -69,7 +69,7 @@ public final class MinesweeperGameTests {
     }
 
     @Test public void test04() {
-        // testing a (very) small 1x1 board
+        // testing a (very) small 2x2 board
         // (make sure adjacency checking logic works)
         var b1 = new SquareBoard.ValidatingBoardBuilder() //
                 .row('_', '*') //
@@ -98,6 +98,28 @@ public final class MinesweeperGameTests {
                 1 *
                 1 1
                 mine ct: 1
+                hidden ct: 0
+                """.trim(), g.renderGameState());
+        Assertions.assertTrue(g.inWinState());
+    }
+
+    @Test public void test05() {
+        // testing a (trivial/degenerate) 1x1 board
+        // (make sure adjacency checking logic works)
+        var b1 = new SquareBoard.ValidatingBoardBuilder() //
+                .row('_').build();
+        Assertions.assertTrue(b1.isOk());
+
+        var g = new MinesweeperGame(b1.get());
+        Assertions.assertEquals("""
+                _
+                mine ct: 0
+                hidden ct: 1
+                """.trim(), g.renderGameState());
+        g.advanceGame(0, 0);
+        Assertions.assertEquals("""
+                0
+                mine ct: 0
                 hidden ct: 0
                 """.trim(), g.renderGameState());
         Assertions.assertTrue(g.inWinState());

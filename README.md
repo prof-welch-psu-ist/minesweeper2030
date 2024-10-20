@@ -18,10 +18,11 @@ read too much into the `SquareBoard` builder class (not exactly clearly written)
 
 ### goals:
 
-* everything is immutable
+* the game board type is fully immutable 
 * errors are explicitly handled without exceptions
 * builders to validate/ensure objects are initialized in a valid (immutable) state
-* data types and operations are generalized for flexibility (re: `compute` fn in `SquareBoard`)
+* data types and operations are generalized probably too much (e.g.: the `compute` fn in `SquareBoard`
+which applies a binary function to 'fold' the board into a single value)
 
 ### jdk23 things
 
@@ -108,10 +109,10 @@ Can read more about this at the actual JDK proposal docs:
 
 Fun fact: the ability to pattern match on arbitrary subtypes (not to mention deconstructing them as shown above)
 has basically rendered the entire (longstanding) gang-of-four ["visitor pattern"](https://en.wikipedia.org/wiki/Visitor_pattern) 
-nearly obsolete (in many cases -- we'll consider an example in a future PA perhaps). 
+nearly obsolete (in many cases ... we'll perhaps see this in a future PA). 
 
-So pattern matching is a cool example of how OOP design patterns can be rendered 
-obsolete with the addition of new first-class language features. 
+So pattern matching is a cool example of how entire (longstanding) OOP design patterns 
+can be rendered obsolete with the addition of new first-class language features. 
 
 ### Handling errors
 
@@ -137,7 +138,7 @@ if someone where to try dividing by 0).
 
 > TLDR: under this style, errors are explicitly returned as part 
 of the return value of a function (as opposed to some random exception getting 
-thrown within the body).The idea is to use the language's static type system to 
+thrown within the body). The idea is to use the language's static type system to 
 make "bad state" less easily represented (or not at all manifest) within the 
 program
 

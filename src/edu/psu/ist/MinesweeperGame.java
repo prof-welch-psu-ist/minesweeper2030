@@ -147,11 +147,6 @@ public final class MinesweeperGame {
         board = board.withUpdatedTile(row, col, updateTpe);
     }
 
-    /** Returns true only if {@code 0 <= row, col <= 3}; false otherwise. */
-    private boolean inBounds(int row, int col) {
-        return row >= 0 && row <= 3 && col >= 0 && col <= 3;
-    }
-
     public String renderGameState() {
         // queries the board to see how many mines
         var mineCount = board.compute(0, (tile, acc) -> switch (tile) {
