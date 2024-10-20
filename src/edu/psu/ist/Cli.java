@@ -52,26 +52,33 @@ public final class Cli {
     }
 
     private static void doLoop(Scanner scan, MinesweeperGame g) {
-        System.out.println("enter a row,col number (1-indexed, ex: 1,4) - type q to quit");
+        final var sentinelText = "q";
+        System.out.println("enter a row,col number (1-indexed, ex: 1,4) - type "
+                + sentinelText + " to quit");
         var rawInput = scan.nextLine();
-        var parsedInput = parseInputText(rawInput);
+        var parsedInput = parseInputText(rawInput, sentinelText.toLowerCase());
 
         switch (parsedInput) {
+            case Result.Ok(Pair(var row, var col)) when row < 0 || col < 0 ->
+                    System.out.println("good game");
             case Result.Ok(Pair(var row, var col)) -> {
                 var row2 = row - 1;
                 var col2 = col - 1;
-                if (g.shouldAdvanceGame(row2, col2)) {
-                    g.advanceGame(row2, col2);
-                    System.out.println(g.renderGameState());
-                    System.out.println();
-                } else {
-                    System.out.println("you lose");
+                var tpe = g.revealSquare(row2, col2);
+                switch (tpe) {
+                    case TileType.Mine _ -> System.out.println("you lose");
+                    default -> {
+                        g.advanceGame(row2, col2);
+                        System.out.println();
+                        System.out.println(g.renderGameState());
+                        System.out.println();
+                        doLoop(scan, g);
+                    }
                 }
             }
-            case Result.Err(var msg) when msg.equalsIgnoreCase("q") ->
-                    System.out.println("good game");
-            default -> {
-                System.err.println("bad input");
+            case Result.Err(var msg) -> {
+                System.err.println(g);
+                System.err.println("bad input: " + msg);
                 doLoop(scan, g); // loop again
             }
         }
@@ -121,16 +128,27 @@ public final class Cli {
         return builder.build();
     }
 
-    private static Result<Pair<Integer, Integer>, String> parseInputText(String inputText) {
+    /**
+     * Returns an {@link Result.Ok} instance containing two positive
+     * integers (if {@code inputText} matches the sentinel value, then returns
+     * a pair where one or both values are negative -- signaling halt/quit)
+     * <p>
+     * Returns an {@link Result.Err} instance in the event that
+     * {@code inputText} is malformed.
+     */
+    private static Result<Pair<Integer, Integer>, String> parseInputText(
+            String inputText, String sentinelText) {
         var parts = inputText.trim().split(",");
 
+        if (inputText.equals(sentinelText)) {
+            return Result.ok(Pair.of(-1, -1));
+        }
         if (parts.length != 2) {
             return Result.err("input must be in the format 'row,col' (no spaces)");
         }
         try {
             var parsedFirst = Integer.parseInt(parts[0].trim());
             var parsedSecond = Integer.parseInt(parts[1].trim());
-
             return switch (Pair.of(parsedFirst, parsedSecond)) {
                 case Pair(var row, var col) when inBounds(row, col) -> Result.ok(Pair.of(row, col));
                 default -> Result.err("row and column must be between 1 and 4 (inclusive)");
