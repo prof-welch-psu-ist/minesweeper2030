@@ -15,7 +15,7 @@ import static edu.psu.ist.TileType.*;
  * <p>
  * The rows and cols passed to each public method of this class
  * assume 0-based indexing. The class is mutable -- note that various
- * methods assign-to/update the {@link this#board} field.
+ * methods assign-to/update the {@code board} field.
  */
 public final class MinesweeperGame {
 
