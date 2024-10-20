@@ -189,7 +189,7 @@ public final class SquareBoard {
          * Returns true only if text {@code s} contains a valid number
          * (positive or negative).
          */
-        public static boolean isInt(String s) {
+        private static boolean isInt(String s) {
             try {
                 Integer.parseInt(s);
                 return true;

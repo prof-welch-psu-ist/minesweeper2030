@@ -42,13 +42,18 @@ note that the two `enum` subtypes of `TileType` above are shorthand for the belo
 public sealed interface TileType {
     final class Mine implements TileType { // marked "final" to preclude extension
         public static final Mine MineInst = new Mine();
+
         private Mine() {}
-    } 
+    }
+
     final class Hidden implements TileType {
         public static final Hidden HiddenInst = new Hidden();
+
         private Hidden() {}
-    } 
+    }
+
     record Uncovered(int count) implements TileType {}
+}
 ```
 The "clever" thing with the first (and, in my opinion, clearer) snippet is that 
 enums are actually java's first class language mechanism for expressing 
@@ -115,7 +120,7 @@ will generally just be the singular expression "implementing" a given method.
 
 Some of the data structures used in here (for encapsulating either a success 
 value or a failure encountered) are perhaps the most unfamiliar concepts, 
-e.g.: the `Result` type from the immutableadts pkg). 
+e.g.: the `Result` type from the immutableadts pkg. 
 
 Perhaps the most 'byzantine' part here: the use of types like these to encapsulate 
 "bad" or "erroneous" values from functions. E.g., instead of `div(2, 0)` throwing 
