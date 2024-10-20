@@ -58,6 +58,7 @@ public final class Cli {
         var rawInput = scan.nextLine();
         if (rawInput.equalsIgnoreCase("q")) {
             System.out.println("quitting - good game");
+            return;
         }
         var parsedInput = parseInputText(rawInput);
 
@@ -100,7 +101,8 @@ public final class Cli {
      * </code></pre>
      * Here, the cells around the mine should have a mine count of 1. This method
      * will happily load this representation. Though it objects when there is a
-     * <em>syntactically</em> invalid board in the file.
+     * <em>syntactically</em> invalid board in the file (i.e.: not square or
+     * with unrecognized tile types)
      */
     public static Result<SquareBoard, String> loadFromFile(String fileName) {// not used atm
         try (var scan = new Scanner(Path.of(fileName))) {
