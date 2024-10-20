@@ -118,7 +118,7 @@ public final class MinesweeperGame {
                 .size();
     }
 
-    private TileType tile(int row, int col) {
+    /*private TileType tile(int row, int col) {
 
     }
 
@@ -135,7 +135,7 @@ public final class MinesweeperGame {
             // otherwise do nothing
             default -> board;
         };
-    }
+    }*/
 
     /**
      * <pre><code>
