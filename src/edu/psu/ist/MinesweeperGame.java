@@ -98,7 +98,7 @@ public final class MinesweeperGame {
                 Pair.of(row - 1, col - 1), // top-left
                 Pair.of(row - 1, col + 1)); // top-right
 
-        return adjacentLocs(row, col).filter((p) -> switch (p) {
+        return adjacentLocs.filter((p) -> switch (p) {
             case Pair(var x, var y) -> (x >= 0 && x < dim) && (y >= 0 && y < dim);
         });
     }
