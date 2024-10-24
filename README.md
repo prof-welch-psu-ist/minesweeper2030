@@ -1,125 +1,176 @@
-# CLI Minesweeper-2030
+## A byzantine minesweeper2030 approach
 
-In this assignment you will practice test driven development (using jUnit) in addition to object 
-modeling and capturing the design of your program using UML class diagrams.
+> NOTE: not intended to be a serious solution (just one that deliberately attempts 
+> to obtain a [pure functional](https://en.wikipedia.org/wiki/Purely_functional_programming) 
+> jdk 23 sanctioned(?) [codegolf](https://en.wikipedia.org/wiki/Code_golf) solution)
 
-You will be implementing a basic command-line-interface (CLI) minesweeper game. 
-This is a single player game that's played on NxN grid, where some number of squares within the  
-grid are marked as "mines."
+It is mostly an (ill-advised) attempt to utilize some newer Java language 
+features + functional programming, including:
+* record types
+* sealed interfaces and records as well as design patterns like singletons 
+to represent certain (duplicated) square types that make up the board.
+  * [here is an excellent article summarizing sealed interfaces and records](https://blog.jetbrains.com/idea/2020/09/java-15-and-intellij-idea/)
+* pattern matching via [switch expressions](https://docs.oracle.com/en/java/javase/17/language/switch-expressions-and-statements.html)
 
-On every turn, the player selects a square on the grid and one of two things should happen:
-* if the square the player selected is a mine, they lose immediately
-* if the square the player selected is not a mine and at least one of the squares adjacent to it (including diagonally) is a mine, the square reveals the number of adjacent mines. This number remains displayed in that grid square until the end of the game.
+Tips if reading: focus on the tests and how they are structured and organized; don't 
+read too much into the `SquareBoard` builder class (not exactly clearly written) or the 
+`compute` method -- which makes extensive use functional list operations (like fold). 
 
-In our version, we will restrict ourselves to 4x4 grids only. Normally too, the mines are 
-kept secret from the player, though in this assignment, we'll leave them revealed for simplicity.
+### goals:
 
-The player wins when they have revealed all squares that are **not** mines.
+* the game board type is fully immutable 
+* errors are explicitly handled without exceptions
+* builders to validate/ensure objects are initialized in a valid (immutable) state
+* data types and operations are generalized probably too much (e.g.: the `compute` fn in `SquareBoard`
+which applies a binary function to 'fold' the board into a single value)
 
-> **CHALLENGE:** Do as much of this as you can without LLM assistance (get to the highest step you can)
-> 
-> **CHALLENGE++:** Do this without LLM assistance in 25 mins max, stop when you hit the limit 
-> (start a timer) -- which step did you get to?
+### jdk23 things
 
-## Step 1: object modeling
+Most of the data structures are modeled "algebraically" as a sealed interface
+type consisting of some number of implementing types (records/constructors).
 
-Come up with a data structure to store the state of the game (the board).
+For example, `TileType`:
+```java
+public sealed interface TileType {
+enum Mine                   implements TileType {MineInst}  
+enum Hidden                 implements TileType {HiddenInst}
+record Uncovered(int count) implements TileType {}
+```
 
-Create a 4x4 board and place mines in the first two places in third column.
+note that the two `enum` subtypes of `TileType` above are shorthand for the below approach
+(which is more akin to the singleton approach discussed in lecture):
+```java
+public sealed interface TileType {
+    final class Mine implements TileType { // marked "final" to preclude extension
+        public static final Mine MineInst = new Mine();
 
-Have the ability to render the board in string form. In the string, 
-represent an empty square with a dash `-` and a mine with a `*`. 
-Your output should look like the image shown.
+        private Mine() {}
+    }
 
-<img src="img/step1.png" alt="step1grid" width="250"/>
+    final class Hidden implements TileType {
+        public static final Hidden HiddenInst = new Hidden();
 
-A good initial unit test would be to ensure that your board rendering logic is working 
-before proceeding.
+        private Hidden() {}
+    }
 
-## Step 2: revealing squares
+    record Uncovered(int count) implements TileType {}
+}
+```
+The "clever" thing with the first (and, in my opinion, clearer) snippet is that 
+enums are actually java's first class language mechanism for expressing 
+singleton objects....
 
-Now create a function to reveal a square on the board. 
+[Scala](https://www.scala-lang.org/), a JVM-based language released in ~2009 that embraces a functional 
+programming OO-mixture approach, is  an example of JVM-based language that that 
+has "true" first class support for singleton types. Here's how the algebraic 
+type for `TileType` would look in scala 3:
+```scala 3
+sealed trait TileType // traits are like interfaces in Java (applies to: `sealed` too)
+object TileType:
+  case object Mine extends TileType     // the "object" keyword means Mine is a singleton
+  case object Hidden extends TileType
+  case class Uncovered(count: Int) extends TileType // case class == java record types
+```
 
-This function should take two inputs, a row and a column, and reveal the
-selected square using the rules of Minesweeper:
-- **if the selection is a mine**, print the board followed by the text "you lose".
-- **if the selection is not a mine**, change that square to display the number of 
-mines adjacent to it (including diagonally).
+Note the similarity between the `sealed interface` jdk23 approach and the scala
+approach above.
 
-Test your function by revealing some number of squares. The picture below has revealed
-the first, third, and fourth squares in the second column (your output should 
-look like the image shown):
+Modeling the various types of tiles that comprise the board allows you to 
+"pattern match". A feature just added to Java in Sept 2023, e.g.:
 
-<img src="img/step2.png" alt="step2grid" width="250"/>
+```java 
+String renderTileAsString(TileType tile) {
+  return switch (tile) {
+    case Mine.MineInst      -> "*";
+    case Hidden.HiddenInst  -> "_";
+    case Uncovered(var c)   -> c + ""; // could also say: case Uncovered(int count) -> c + "";
+  };
+}
+```
+The last case is especially interesting as we're "deconstructing" the record type we used
+to model the idea of an uncovered square and matching on the record instance's internal 
+structure -- where `c` is the adjacent mine count for the uncovered square we match... 
 
-## Step 3: user input
+If we didn't use a deconstruction pattern here, we'd have to do it like so:
 
-Now make it such that your game can take user input (use the good ol' `Scanner` type for this).
+```java 
+String renderTileAsString2(TileType tile) {
+  return switch (tile) {
+    case Mine.MineInst      -> "*";
+    case Hidden.HiddenInst  -> "_";
+    case Uncovered u        -> u.count() + "";
+  };
+}
+```
 
-Prompt the user to enter a (1-indexed) row and column, separated by a comma
-(e.g., `2,3` for the second row and third column).
+Can read more about this at the actual JDK proposal docs:
 
-If the user's input is invalid, prompt them for a new one.
+> https://openjdk.org/jeps/405
 
-Otherwise, reveal the square using the function from the previous step, print the board,
-and either tell the player they lost or prompt them for another input.
+Fun fact: the ability to pattern match on arbitrary subtypes (not to mention deconstructing them as shown above)
+has basically rendered the entire (longstanding) gang-of-four ["visitor pattern"](https://en.wikipedia.org/wiki/Visitor_pattern) 
+nearly obsolete (in many cases ... we'll perhaps see this in a future PA). 
 
-Here's a useful test case that makes the following selections:
-* 1,1
-* 2,4
-* 2,3
+So pattern matching is a cool example of how entire (longstanding) OOP design patterns 
+can be rendered obsolete with the addition of new first-class language features. 
 
-Your tests (among other that you think up) should check that 
-your board matches the picture below:
+### Handling errors
 
-<img src="img/step3.png" alt="step3grid" width="250"/>
+This type of pattern matching is used throughout -- the pattern/switch match 
+will generally just be the singular expression "implementing" a given method.
 
-## Step 4: adding a win check
+Some of the data structures used in here (for encapsulating either a success 
+value or a failure encountered) are perhaps the most unfamiliar concepts, 
+e.g.: the `Result` type from the immutableadts pkg. 
 
-After a player's move, check whether every square that is *not* a 
-mine has been revealed. If so, print "you win" after the player's
-move and do not prompt them for another move.
+Perhaps the most 'byzantine' part here: the use of types like these to encapsulate 
+"bad" or "erroneous" values from functions. E.g., instead of `div(2, 0)` throwing 
+an illegal argument exception (which is 'impure' as it has an effect to IO -- 
+the console), in this style `div` would return a `Result<Int, ErrMsg>` where error 
+msg is perhaps some other specialized type for describing the exact calamitous outcome 
+that results from trying to divide by 0. 
 
-Write additional tests that cover the board with mines except two 
-squares `(2,3)` and `(1,1)`, then select those two squares by entering
-`2,3` and `1,1`. Your board should match the image below:
+This not only forces client calling code to explicitly respond to the possibility 
+of errors. It also heavily leans on (in our case, the Java compiler's) static 
+type checker to rule out -- at compile time -- bad state from creeping into the 
+program from unexpected sources... like runtime exceptions (which would normally happen 
+if someone where to try dividing by 0). 
 
-<img src="img/step4.png" alt="step4grid" width="250"/>
+> TLDR: under this style, errors are explicitly returned as part 
+of the return value of a function (as opposed to some random exception getting 
+thrown within the body). The idea is to use the language's static type system to 
+make "bad state" less easily represented (or not at all manifest) within the 
+program
 
-## Step 5: reveal (optional -- slightly more difficult)
+### persistent collections
 
-When a player reveals a square with a `0` (that is, with no adjacent mines),
-automatically reveal all squares adjacent to the original square. Repeat this 
-process for any of the adjacent squares that also have no adjacent mines, until
-all `0`s in a contiguous region (and all cells adjacent to one of those `0`s) 
-are revealed.
+The immutable collections framework, [vavr](https://github.com/vavr-io/vavr) is
+used here to provide drop-in (immutable) replacements for all the standard
+(mutable) Java collections.
 
-> note: this process should never uncover a mine, so it should never result in a player losing
+This library gives us collections with many of the 'standard' functional operators:
+* `map`, `filter`, `foldLeft`, etc.
 
-Write unit tests for this. One potential good one involves returning to the 
-original board (4x4 with mines in the first two squares and third column), 
-then entering `4,1` should cause your board to look as it does below:
+Mostly make use of `vavr`s copy-on-write `Vector` type, which we wrap in a `Row` ...
+where n `Row`s make up a (NxN) `SquareBoard` object. And though this vector
+type is slower with $O(log n)$ `get(i)` (access) calls than a standard mutable
+`ArrayList` which is constant -- $O(1)$ ... this is good enough (4x4) as our boards are
+small + `Vector` is fully immutable.
 
-<img src="img/step5.png" alt="step5grid" width="250"/>
+By the $log_2$ function, I guess we'd only start paying somewhat larger runtime
+penalties if the board were to become 1000x1000 or something... then we'd need to
+store 1000 entries in our inner vector `v`
 
-## UML + 1/2-3/4pg reflection
+$$log_2 ( 1000 ) = 9.9$$
 
-Accompany your submission with a UML class diagram documenting the design of your 
-system. 
+so returning the value at index `i` via `v.get(i)` will only take 9.9
+steps internally to complete.... the vector internally stores the data in a balanced
+tree-like data structure and this 9.9 means we will only ever need to zig-zag
+down 9 levels of that tree... even if we get to $log_2(10000)$ we're only looking at
+13.3 moves down the tree. So: the $log_2$ function grows extremely slow... meaning
+algorithms with $log$ -based runtimes are highly scalable (even as they grow to store
+massive amounts of data).
 
-The UML can actually be included in your reflection -- which should document your 
-thought process in coming with the data structure for the board, design considerations,
-and generally on the maintainability and extensibility of the code you ended up with. 
-If you attempted the challenges listed at the top of this readme, include which step you 
-got to within the limit and the biggest bottleneck. 
-
-# Handin
-
-When you are ready to submit (or simply want to 'checkin' your work for the day), open the terminal, 
-cd to the project directory, then make a commit by typing:
-
-> git commit -am "message goes here"
-
-then follow this up with a
-
-> git push origin main
+We will get to trees soon. There are lots of great examples of tree structures amenable
+to immutability; including many others that are more naturally mutable:
+from both a performance and implementation-simplicity perspective (heaps come to mind here).
