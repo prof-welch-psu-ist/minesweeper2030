@@ -91,7 +91,7 @@ public final class SquareBoard {
          */
         private final ArrayList<Vector<Result<TileType, String>>> mutRows = new ArrayList<>();
 
-        // nb: TileType... tpes is "syntactic" sugar for an array of
+        // nb: TileType... tpes is "syntactic sugar" for an array of
         // TileTypes: TileType[]
         public ValidatingBoardBuilder row(TileType... tpes) {
 
